@@ -3,25 +3,28 @@
 performs the parrec 2 nifti conversion (on sc)
 
 ```
-swv=v1.0.0.rc6
-dsv=v1.0.0.rc3
-sfile=lhab_13subj.tsv
+swv=v1.0.0
+dsv=v1.0.0
+sfile=lhab_all_subjects.tsv
+image_id=143f93b1-db00-4744-b452-d477d089982a
 
-screen python `which bidswrapps_start.py` \
+screen bidswrapps_start.py \
 fliem/lhab_pipelines:${swv} \
 /data.nfs/LHAB/01_RAW /data.nfs/LHAB/NIFTI participant \
 -pf /data.nfs/LHAB/01_RAW/00_PRIVATE_sub_lists/${sfile} \
 --runscript_cmd "python /code/lhab_pipelines/scripts/nii_conversion/run_nii_conversion.py" \
 -ra "--no-public_output --ds_version ${dsv}" \
+--image_id ${image_id} \
 -s cloudsessions/lhab.conv.private.${dsv} -o /data.nfs/LHAB/logfiles/${dsv}/logs_private -C 15 -c 1
 
 
-screen python `which bidswrapps_start.py` \
+screen bidswrapps_start.py \
 fliem/lhab_pipelines:${swv} \
 /data.nfs/LHAB/01_RAW /data.nfs/LHAB/NIFTI participant \
 -pf /data.nfs/LHAB/01_RAW/00_PRIVATE_sub_lists/${sfile} \
 --runscript_cmd "python /code/lhab_pipelines/scripts/nii_conversion/run_nii_conversion.py" \
 -ra "--ds_version ${dsv}" \
+--image_id ${image_id} \
 -s cloudsessions/lhab.conv.public.${dsv} -o /data.nfs/LHAB/logfiles/${dsv}/logs_public -C 15 -c 1
 
 
@@ -34,9 +37,9 @@ fliem/lhab_pipelines:${swv} \
 checks data and reduces subjects data
 
 ```
-swv=v1.0.0.rc6
-dsv=v1.0.0.rc3
-vshort=rc3
+swv=v1.0.0
+dsv=v1.0.0
+vshort=v1.0.0
 sfile=lhab_13subj.tsv
 
 
@@ -58,7 +61,7 @@ fliem/lhab_pipelines:${swv} python /code/lhab_pipelines/scripts/nii_conversion/r
 
 ## freesurfer
 ```
-dsv=v1.0.0.rc3
+dsv=v1.0.0
 screen python `which bidswrapps_start.py` \
 bids/freesurfer:v6.0.0-2 \
 /data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer participant \
@@ -69,7 +72,7 @@ bids/freesurfer:v6.0.0-2 \
 
 ## tracula
 ```
-dsv=v1.0.0.rc3
+dsv=v1.0.0
 screen python `which bidswrapps_start.py` \
 bids/tracula:v6.0.0-1 \
 /data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/tracula participant \
