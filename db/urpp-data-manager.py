@@ -42,6 +42,10 @@ def setup():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-s', '--add-subjects', dest='subjects', type=str,
                         help='CSV file containing the new subjects')
+    parser.add_argument('-m', '--behavioral-memory', dest='bmem', type=str,
+                        help='CSV file containing the behavioral memory')
+    parser.add_argument('-a', '--behavioral-attention', dest='atte', type=str,
+                        help='CSV file containing the behavioral attention')
     args = parser.parse_args()
     return args 
 
@@ -55,22 +59,29 @@ def openbis_instance():
     return s
 
 def main(opts, session):
+
+    # create a list of all subjects and verify for each insert if subject is not already present
+    subjects_list = {}
+    for i in session.get_samples(experiment="/FLIEM/LHAB_TEST/E158", type="SUBJECT"):
+        subjects_list[i.props.subject_id] = i.identifier
+
     if opts.subjects:
-        # create a list of all subjects and verify for each insert if subject is not already present
-
-        subjects_list = []
-        for i in session.get_samples(experiment="/FLIEM/LHAB_TEST/E158", type="SUBJECT"):
-            subjects_list.append(i.props.subject_id)
-
         with open(opts.subjects, 'r') as subjects_file:
             csv_file = csv.DictReader(subjects_file)
             for row in csv_file:
                 if row["participant_id"] not in subjects_list:
-                    sample = session.new_sample(space="FLIEM", type="SUBJECT", experiment="/FLIEM/LHAB_TEST/E158")
+                    sample = session.new_sample(space="FLIEM", type="SUBJECT", experiment="/FLIEM/LHAB_TEST/E158", props={"gender":row["sex"],"subject_id":row["participant_id"]})
                     sample.save()
-                    session.update_sample(sample.permId, properties={"gender":row["sex"],"subject_id":row["participant_id"]})
                 else: 
                     print ("Participant %s, already part of the project" % (row["participant_id"]))
+
+    elif opts.bmem:
+        with open(opts.bmem, 'r') as memory_file:
+            csv_file = csv.DictReader(memory_file)
+            for row in csv_file:
+                sample = session.new_sample(space="FLIEM", type="SUBJECT_MEMORY", experiment="/FLIEM/LHAB_TEST/E181", props={"participant_id":row["participant_id"],"session_id":row["session_id"],"score_1":int(row["score_1"]),"score_2":int(row["score_2"])})
+                sample.save()
+                session.update_sample(sample.permId, parents=subjects_list.get(sample.props.participant_id))
 
 if __name__ == "__main__":
     opts = setup()
