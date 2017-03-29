@@ -46,6 +46,8 @@ def setup():
                         help='CSV file containing the behavioral memory')
     parser.add_argument('-a', '--behavioral-attention', dest='atte', type=str,
                         help='CSV file containing the behavioral attention')
+    parser.add_argument('-r', '--mri-data', dest='mri', type=str,
+                        help='Directory containing all mri data')
     args = parser.parse_args()
     return args 
 
@@ -70,7 +72,8 @@ def main(opts, session):
             csv_file = csv.DictReader(subjects_file)
             for row in csv_file:
                 if row["participant_id"] not in subjects_list:
-                    sample = session.new_sample(space="FLIEM", type="SUBJECT", experiment="/FLIEM/LHAB_TEST/E158", props={"gender":row["sex"],"subject_id":row["participant_id"]})
+                    sample = session.new_sample(space="FLIEM", type="SUBJECT", experiment="/FLIEM/LHAB_TEST/E158",\
+                            props={"gender":row["sex"],"subject_id":row["participant_id"]})
                     sample.save()
                 else: 
                     print ("Participant %s, already part of the project" % (row["participant_id"]))
@@ -79,7 +82,23 @@ def main(opts, session):
         with open(opts.bmem, 'r') as memory_file:
             csv_file = csv.DictReader(memory_file)
             for row in csv_file:
-                sample = session.new_sample(space="FLIEM", type="SUBJECT_MEMORY", experiment="/FLIEM/LHAB_TEST/E181", parents=subjects_list.get(row["participant_id"]), props={"participant_id":row["participant_id"],"session_id":row["session_id"],"score_1":int(row["score_1"]),"score_2":int(row["score_2"])})
+                sample = session.new_sample(space="FLIEM", type="SUBJECT_MEMORY", experiment="/FLIEM/LHAB_TEST/E181",\
+                        parents=subjects_list.get(row["participant_id"]), props={"participant_id":row["participant_id"],\
+                        "session_id":row["session_id"],"score_1":int(row["score_1"]),"score_2":int(row["score_2"])})
+                sample.save()
+
+    elif opts.mri:
+        for root, subdirs, filenames in os.walk(opts.mri):
+            for f in filenames:
+                filename = os.path.splitext(f)[0]
+                extention = os.path.splitext(f)[1]
+                subject = filename.split("_")[0]
+                subject_id = subject.split("-")[1]
+                sample = session.new_sample(space="FLIEM", type="SUBJECT_MRI", experiment="/FLIEM/LHAB_TEST/E183",\
+                        parents=subjects_list.get(subject_id), attachments=os.path.join(root, f),\
+                        props={"subject_id":subject_id,"mri_acquisition":filename.split("_")[2],\
+                        "mri_modality":filename.split("_")[4],"mri_run":filename.split("_")[1],\
+                        "mri_sequence":filename.split("_")[3]})
                 sample.save()
 
 if __name__ == "__main__":
