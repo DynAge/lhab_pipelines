@@ -79,9 +79,8 @@ def main(opts, session):
         with open(opts.bmem, 'r') as memory_file:
             csv_file = csv.DictReader(memory_file)
             for row in csv_file:
-                sample = session.new_sample(space="FLIEM", type="SUBJECT_MEMORY", experiment="/FLIEM/LHAB_TEST/E181", props={"participant_id":row["participant_id"],"session_id":row["session_id"],"score_1":int(row["score_1"]),"score_2":int(row["score_2"])})
+                sample = session.new_sample(space="FLIEM", type="SUBJECT_MEMORY", experiment="/FLIEM/LHAB_TEST/E181", parents=subjects_list.get(row["participant_id"]), props={"participant_id":row["participant_id"],"session_id":row["session_id"],"score_1":int(row["score_1"]),"score_2":int(row["score_2"])})
                 sample.save()
-                session.update_sample(sample.permId, parents=subjects_list.get(sample.props.participant_id))
 
 if __name__ == "__main__":
     opts = setup()
