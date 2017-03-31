@@ -130,7 +130,7 @@ if __name__ == "__main__":
     ds_desc_file = os.path.join(output_dir, "dataset_description.json")
     if not os.path.exists(ds_desc_file):
         description = {"Name": "LHAB longitudinal healthy aging brain study",
-                       "BIDSVersion": "1.0.0",
+                       "BIDSVersion": "1.0.1",
                        # "License": "XXXXXX what license is this dataset distributed under? The use of license name "
                        #            "abbreviations is suggested for specifying a license. A list of common licenses"
                        #            " with suggested abbreviations can be found in appendix III.",
