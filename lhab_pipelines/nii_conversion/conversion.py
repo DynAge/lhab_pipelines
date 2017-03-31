@@ -75,7 +75,7 @@ def convert_modality(old_subject_id, old_ses_id, output_dir, bids_name, bids_mod
         bids_sub = "sub-" + get_clean_subject_id(old_subject_id)
     mapping_file = os.path.join(output_dir, bids_sub, "par2nii_mapping.txt")
 
-    par_file_list = glob("*" + search_str + "*.par")
+    par_file_list = sorted(glob("*" + search_str + "*.par"))
     if par_file_list:
         sub_output_dir = os.path.join(output_dir, bids_sub)
         nii_output_dir = os.path.join(sub_output_dir, bids_ses, bids_modality)

@@ -35,7 +35,7 @@ def calc_session_duration(output_dir, public_output, use_new_ids):
         raise Exception("cannot calc session duration from non private data.")
 
     os.chdir(output_dir)
-    subjects_list = glob("sub*")
+    subjects_list = sorted(glob("sub*"))
     if not subjects_list:
         raise Exception("No subjects found in %s" % output_dir)
 
@@ -158,7 +158,7 @@ def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_fo
     for old_sub_id in old_sub_id_list:
         new_sub_id = get_public_sub_id(old_sub_id, new_id_lut_file)
         sub_dir = os.path.join(output_dir, "sub-" + new_sub_id)
-        f = glob(sub_dir)
+        f = sorted(glob(sub_dir))
         if not f:
             raise Exception("No folder not found: %s" % sub_dir)
     print("%d subjects from list found in folder %s. Seems OK...\n" % (len(old_sub_id_list), output_dir))
@@ -178,7 +178,7 @@ def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_fo
 
             for info in info_list:
                 par_search_str = os.path.join(sub_ses_par_dir, "*" + info["search_str"] + "*.par")
-                par_f = glob(par_search_str)
+                par_f = sorted(glob(par_search_str))
                 n_files_par = len(par_f)
 
                 if "acq" in info.keys():
@@ -191,7 +191,7 @@ def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_fo
                     dir_str = ""
                 nii_search_str = os.path.join(sub_ses_nii_dir, info["bids_modality"], "*" + acq_str + "*" + dir_str
                                               + "*" + info["bids_name"] + "*.nii.gz")
-                nii_f = glob(nii_search_str)
+                nii_f = sorted(glob(nii_search_str))
                 n_files_nifti = len(nii_f)
 
                 c = info["bids_modality"] + "_" + info["bids_name"] + \
@@ -206,12 +206,12 @@ def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_fo
                 # TODO check physio
                 if "physio" in info.keys() and info["physio"]:
                     phys_par_search_str = os.path.join(sub_ses_par_dir, "*" + info["search_str"] + "*_physio.log")
-                    phys_par_f = glob(phys_par_search_str)
+                    phys_par_f = sorted(glob(phys_par_search_str))
                     phys_n_files_par = len(phys_par_f)
 
                     phys_nii_search_str = os.path.join(sub_ses_nii_dir, info["bids_modality"], "*" + acq_str + "*" +
                                                        dir_str + "*" + info["bids_name"] + "*_physio.tsv")
-                    phys_nii_f = glob(phys_nii_search_str)
+                    phys_nii_f = sorted(glob(phys_nii_search_str))
                     phys_n_files_nifti = len(phys_nii_f)
 
                     c = info["bids_modality"] + "_" + info["bids_name"] + \
