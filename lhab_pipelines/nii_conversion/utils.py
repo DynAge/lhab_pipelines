@@ -142,6 +142,7 @@ def _process_gen_dict(gen_dict):
         'Angulation midslice(ap,fh,rl)[degr]': ('angulation', float, (3,)),
         'Water Fat shift [pixels]': ('water_fat_shift', float),
         'EPI factor        <0,1=no EPI>': ('epi_factor', float),
+        'Acquisition nr': ("acquisition_nr", int),
     }
 
     slice_orientation_translation = {1: 'transverse',
