@@ -5,7 +5,8 @@ performs the parrec 2 nifti conversion (on sc)
 swv=v1.1.0
 dsv=v1.1.0
 sfile=lhab_all_subjects.tsv
-image_id=9b7fcf17-f545-4a85-814c-100c8b9eb8f8
+image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
+instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
 fliem/lhab_pipelines:${swv} \
@@ -14,7 +15,8 @@ fliem/lhab_pipelines:${swv} \
 --runscript_cmd "python /code/lhab_pipelines/scripts/nii_conversion/run_nii_conversion.py" \
 -ra "--no-public_output --ds_version ${dsv}" \
 --image_id ${image_id} \
--s cloudsessions/lhab.conv.private.${dsv} -o /data.nfs/LHAB/logfiles/${dsv}/logs_private -C 15 -c 1
+--instance_type ${instance_type} \
+-s cloudsessions/lhab.conv.private.${dsv} -o /data.nfs/LHAB/logfiles/${dsv}/logs_private -C 15 -c 1 -v -J 660
 
 
 screen bidswrapps_start.py \
@@ -24,7 +26,8 @@ fliem/lhab_pipelines:${swv} \
 --runscript_cmd "python /code/lhab_pipelines/scripts/nii_conversion/run_nii_conversion.py" \
 -ra "--ds_version ${dsv}" \
 --image_id ${image_id} \
--s cloudsessions/lhab.conv.public.${dsv} -o /data.nfs/LHAB/logfiles/${dsv}/logs_public -C 15 -c 1
+--instance_type ${instance_type} \
+-s cloudsessions/lhab.conv.public.${dsv} -o /data.nfs/LHAB/logfiles/${dsv}/logs_public -C 15 -c 1 -v -J 660
 
 
 ```
@@ -59,11 +62,11 @@ fliem/lhab_pipelines:${swv} python /code/lhab_pipelines/scripts/nii_conversion/r
 ## mriqc
 ```
 dsv=v1.1.0
-image_id=01831776-7c20-4d4b-9e64-06e420494c7a
+image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
 instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
-poldracklab/mriqc:0.9.0-0-python35 \
+poldracklab/mriqc:0.9.1 \
 /data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/mriqc participant \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
@@ -71,7 +74,7 @@ poldracklab/mriqc:0.9.0-0-python35 \
 -s cloudsessions/lhab.mriqc.${dsv} -o /data.nfs/LHAB/logfiles/mriqc.${dsv} -w 60hours -C 15 -c 4 -m 4GB -v
 
 screen bidswrapps_start.py \
-poldracklab/mriqc:0.9.0-0-python35 \
+poldracklab/mriqc:0.9.1 \
 /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/mriqc/derivatives /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/mriqc/ group \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
@@ -84,7 +87,7 @@ poldracklab/mriqc:0.9.0-0-python35 \
 ## freesurfer
 ```
 dsv=v1.1.0
-image_id=9b7fcf17-f545-4a85-814c-100c8b9eb8f8
+image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
 instance_type=8cpu-32ram-hpc
 screen bidswrapps_start.py \
 bids/freesurfer:v6.0.0-2 \
@@ -109,7 +112,7 @@ bids/freesurfer:v6.0.0-2 \
 ## tracula
 ```
 dsv=v1.1.0
-image_id=9b7fcf17-f545-4a85-814c-100c8b9eb8f8
+image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
 instance_type=2cpu-8ram-hpc
 
 screen bidswrapps_start.py \
