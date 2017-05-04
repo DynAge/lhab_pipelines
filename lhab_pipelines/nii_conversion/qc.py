@@ -3,6 +3,10 @@ from glob import glob
 import os, shutil, datetime
 
 
+def write_log(log_file, log):
+    with open(log_file, "a") as fi:
+        fi.write(" ".join(log))
+
 
 def move_excluded_t1w_scans(source_path, mri_qc_path, exclusion_path, exclusion_file):
     """ Funktion takes exclusion file moves t1w/json and mriqc files to exclusion_path
@@ -14,6 +18,7 @@ def move_excluded_t1w_scans(source_path, mri_qc_path, exclusion_path, exclusion_
     """
     log_file = os.path.join(exclusion_path, "00_log.txt")
     log = ["\n\n*************", str(datetime.datetime.now()), "\n", exclusion_file, "\n"]
+    write_log(log_file, log)
 
     df = pd.read_excel(exclusion_file)
     bad_scans = df[df.exclude == 1]
@@ -69,7 +74,8 @@ def move_excluded_t1w_scans(source_path, mri_qc_path, exclusion_path, exclusion_
                 removed_line = scans[scans.filename.str.contains(bad_scan)]
                 scans = scans[~scans.filename.str.contains(bad_scan)]
                 scans.to_csv(scans_file, sep="\t", index=False)
-                log.append("removed " + bad_scan + " from " + scans_file + "\n")
+                log = ["removed " + bad_scan + " from " + scans_file + "\n"]
+                write_log(log_file, log)
 
             # move files
             for source_file in source_files:
@@ -78,9 +84,7 @@ def move_excluded_t1w_scans(source_path, mri_qc_path, exclusion_path, exclusion_
                     raise Exception(
                         "file already exists, something went wrong: %s" % os.path.join(target_path, filename))
                 shutil.move(source_file, os.path.join(target_path, filename))
-                log.append("moved " + source_file + " to " + os.path.join(target_path, filename) + "\n")
+                log = ["moved " + source_file + " to " + os.path.join(target_path, filename) + "\n"]
+                write_log(log_file, log)
 
-        log.append("\n")
-
-    with open(log_file, "a") as fi:
-        fi.write(" ".join(log))
+        write_log(log_file, ["\n"])
