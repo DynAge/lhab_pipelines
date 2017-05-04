@@ -2,7 +2,7 @@
 performs the parrec 2 nifti conversion (on sc)
 
 ```
-swv=v1.1.0
+swv=v1.1.1
 dsv=v1.1.0
 sfile=lhab_all_subjects.tsv
 image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
@@ -39,7 +39,7 @@ fliem/lhab_pipelines:${swv} \
 checks data and reduces subjects data
 
 ```
-swv=v1.1.0
+swv=v1.1.1
 dsv=v1.1.0
 vshort=v1.1.0
 sfile=lhab_all_subjects.tsv
