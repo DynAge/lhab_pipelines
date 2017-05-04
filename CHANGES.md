@@ -1,3 +1,6 @@
+* v1.1.3
+    * added participant_label flag to move_excluded_t1w_data.py for compatibilty
+
 * v1.1.2
     * added move excluded t1w scans
 
