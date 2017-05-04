@@ -1,7 +1,7 @@
 ## move_excluded_t1w_data.py
 This version takes data from v1.1.0 and removes t1w images
 ```
-swv=v1.1.2
+swv=v1.1.3
 dsv=v1.1.1
 image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
 instance_type=4cpu-16ram-hpc
@@ -23,7 +23,7 @@ fliem/lhab_pipelines:${swv} \
 checks data and reduces subjects data
 
 ```
-swv=v1.1.2
+swv=v1.1.3
 dsv=v1.1.1
 vshort=v1.1.1
 sfile=lhab_all_subjects.tsv
