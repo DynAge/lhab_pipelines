@@ -74,7 +74,7 @@ def move_excluded_t1w_scans(source_path, mri_qc_path, exclusion_path, exclusion_
             # move files
             for source_file in source_files:
                 filename = os.path.basename(source_file)
-                if os.path.exists():
+                if os.path.exists(os.path.join(target_path, filename)):
                     raise Exception(
                         "file already exists, something went wrong: %s" % os.path.join(target_path, filename))
                 shutil.move(source_file, os.path.join(target_path, filename))
