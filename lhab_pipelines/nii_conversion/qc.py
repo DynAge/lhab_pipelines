@@ -2,11 +2,6 @@ import pandas as pd
 from glob import glob
 import os, shutil, datetime
 
-source_path = "/Users/franzliem/Desktop/in_test/sourcedata"
-mri_qc_path = "/Users/franzliem/Desktop/in_test/derivates/mriqc"
-move_path = "/Users/franzliem/Desktop/cp_test"
-
-exclusion_file = "/Volumes/lhab_raw/Documentation/v1.1.0_overview/qc_t1w/visu_ratings_fl_20170503.xlsx"
 
 
 def move_excluded_t1w_scans(source_path, mri_qc_path, exclusion_path, exclusion_file):
