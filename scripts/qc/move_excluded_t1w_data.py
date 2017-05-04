@@ -13,6 +13,8 @@ if __name__ == "__main__":
 
     parser.add_argument('--mri_qc_path', help="Directory containing mriqc data")
     parser.add_argument('--exclusion_file', help="file with scans that should be excluded")
+    parser.add_argument('--participant_label', help="Ignored. Included for compatibilty reasons (bidswrapps)")
+
     args = parser.parse_args()
 
     move_excluded_t1w_scans(args.source_path, args.mri_qc_path, args.exclusion_path, args.exclusion_file)
