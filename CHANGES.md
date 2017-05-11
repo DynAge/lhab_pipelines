@@ -1,3 +1,6 @@
+* v1.1.5
+    * added exclude bad dwi scans
+
 * v1.1.4
     * fixed arg bug
 
