@@ -100,7 +100,7 @@ bids/freesurfer:v6.0.0-2 \
 ## freesurfer qc
 ```
 dsv=v1.1.1
-image_id=e7a35e07-bc5d-43f0-8249-ee93c88aa226
+image_id=eed83290-1d28-4392-a616-59a719c8f417
 instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
