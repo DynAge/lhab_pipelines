@@ -33,7 +33,7 @@ if not os.path.exists(output_dir):
 print(output_dir)
 
 for source_str, target_str in mapping.items():
-    g = glob(source_str + ".par")
+    g = sorted(glob(source_str + ".par"))
 
     if len(g) > 0:
         if source_str == "*t1w*":
@@ -61,13 +61,13 @@ for source_str, target_str in mapping.items():
                 par_time = datetime.datetime(2001, 1, 1, int(par_h), int(par_m), int(par_s))
                 log_time = par_time - datetime.timedelta(0, 14)
                 log_str = "SCANPHYSLOG*{:%H%M%S}.log".format(log_time)
-                phys_files = glob(log_str)
+                phys_files = sorted(glob(log_str))
 
                 # if that doesnt work try +- 1 second
                 for d in [-1,1]:
                     log_time = par_time - datetime.timedelta(0, 14+d)
                     log_str = "SCANPHYSLOG*{:%H%M%S}.log".format(log_time)
-                    phys_files += glob(log_str)
+                    phys_files += sorted(glob(log_str))
 
                 if len(phys_files) == 0:
                     warn("No log file found %s %s" % (source_str, log_str))

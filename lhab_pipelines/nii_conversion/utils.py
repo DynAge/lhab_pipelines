@@ -29,7 +29,7 @@ def get_public_sub_id(old_sub_id, lut_file):
         return df.loc[old_sub_id].values[0]
     else:
         out_list = df.loc[old_sub_id].ix[:, 0].tolist()
-        assert(len(out_list) == len(old_sub_id), "In and out list not the same length %s, %s" % (out_list, old_sub_id))
+        assert len(out_list) == len(old_sub_id), "In and out list not the same length %s, %s" % (out_list, old_sub_id)
         return out_list
 
 
@@ -43,7 +43,7 @@ def get_private_sub_id(new_sub_id, lut_file):
         return df.loc[new_sub_id].values[0]
     else:
         out_list = df.loc[new_sub_id].ix[:, 0].tolist()
-        assert(len(out_list) == len(new_sub_id), "In and out list not the same length %s, %s" % (out_list, new_sub_id))
+        assert len(out_list) == len(new_sub_id), "In and out list not the same length %s, %s" % (out_list, new_sub_id)
         return out_list
 
 
@@ -142,6 +142,7 @@ def _process_gen_dict(gen_dict):
         'Angulation midslice(ap,fh,rl)[degr]': ('angulation', float, (3,)),
         'Water Fat shift [pixels]': ('water_fat_shift', float),
         'EPI factor        <0,1=no EPI>': ('epi_factor', float),
+        'Acquisition nr': ("acquisition_nr", int),
     }
 
     slice_orientation_translation = {1: 'transverse',

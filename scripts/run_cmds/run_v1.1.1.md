@@ -1,47 +1,50 @@
-## run_nii_conversion.py
-performs the parrec 2 nifti conversion (on sc)
-
+## move_excluded_t1w_data.py
+This version takes data from v1.1.0 and removes t1w images
 ```
-swv=v1.1.1
-dsv=v1.1.0
-sfile=lhab_all_subjects.tsv
+swv=v1.1.4
+dsv=v1.1.1
 image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
 instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
 fliem/lhab_pipelines:${swv} \
-/data.nfs/LHAB/01_RAW /data.nfs/LHAB/NIFTI participant \
--pf /data.nfs/LHAB/01_RAW/00_PRIVATE_sub_lists/${sfile} \
---runscript_cmd "python /code/lhab_pipelines/scripts/nii_conversion/run_nii_conversion.py" \
--ra "--no-public_output --ds_version ${dsv}" \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/excluded/ group \
+--volume /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/mriqc:/data/mriqc /data.nfs/LHAB/Documentation/v1.1.0_overview/qc_t1w/:/data/rating \
+--runscript_cmd "python /code/lhab_pipelines/scripts/qc/move_excluded_t1w_data.py" \
+-ra "--mri_qc_path /data/mriqc --exclusion_file /data/rating/visu_ratings_fl_20170503.xlsx" \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
--s cloudsessions/lhab.conv.private.${dsv} -o /data.nfs/LHAB/logfiles/${dsv}/logs_private -C 15 -c 1 -v -J 660
+--no-input-folder-ro \
+-s ~/cloudsessions/lhab.exclude_t1w.${dsv} -o /data.nfs/LHAB/logfiles/${dsv}/exclude_t1w -C 15 -c 1 -v
+```
 
+## move_excluded_dwi_data.py
+```
+swv=v1.1.5
+dsv=v1.1.1
+image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
+instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
 fliem/lhab_pipelines:${swv} \
-/data.nfs/LHAB/01_RAW /data.nfs/LHAB/NIFTI participant \
--pf /data.nfs/LHAB/01_RAW/00_PRIVATE_sub_lists/${sfile} \
---runscript_cmd "python /code/lhab_pipelines/scripts/nii_conversion/run_nii_conversion.py" \
--ra "--ds_version ${dsv}" \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/excluded/ group \
+--volume /data.nfs/LHAB/Documentation/v1.1.0_overview/qc_dwi/:/data/rating \
+--runscript_cmd "python /code/lhab_pipelines/scripts/qc/move_excluded_dwi_data.py" \
+-ra "--exclusion_file /data/rating/remove_dwi_fl_20170511.xlsx" \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
--s cloudsessions/lhab.conv.public.${dsv} -o /data.nfs/LHAB/logfiles/${dsv}/logs_public -C 15 -c 1 -v -J 660
-
-
+--no-input-folder-ro \
+-s ~/cloudsessions/lhab.exclude_dwi.${dsv} -o /data.nfs/LHAB/logfiles/${dsv}/exclude_dwi -C 15 -c 1 -v
 ```
-
-
 
 
 ## run_post_conversion_routines.py
 checks data and reduces subjects data
 
 ```
-swv=v1.1.1
-dsv=v1.1.0
-vshort=v1.1.0
+swv=v1.1.4
+dsv=v1.1.1
+vshort=v1.1.1
 sfile=lhab_all_subjects.tsv
 
 
@@ -49,29 +52,15 @@ docker run --rm -ti \
 -v /Volumes/lhab_raw/01_RAW:/data/in \
 -v /Volumes/lhab_raw/Nifti/${vshort}/:/data/out \
 fliem/lhab_pipelines:${swv} python /code/lhab_pipelines/scripts/nii_conversion/run_post_conversion_routines.py /data/in /data/out --participant_file /data/in/00_PRIVATE_sub_lists/${sfile} --ds_version ${dsv}
-
-
-
-docker run --rm -ti \
--v /Volumes/lhab_raw/01_RAW:/data/in \
--v /Volumes/lhab_raw/Nifti/${vshort}/:/data/out \
-fliem/lhab_pipelines:${swv} python /code/lhab_pipelines/scripts/nii_conversion/run_post_conversion_routines.py /data/in /data/out --participant_file /data/in/00_PRIVATE_sub_lists/${sfile} --ds_version ${dsv} --no-public_output
 ```
 
 
 ## mriqc
+Rerun group step
 ```
-dsv=v1.1.0
+dsv=v1.1.1
 image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
 instance_type=4cpu-16ram-hpc
-
-screen bidswrapps_start.py \
-poldracklab/mriqc:0.9.1 \
-/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/mriqc participant \
---image_id ${image_id} \
---instance_type ${instance_type} \
--ra "--n_procs 4 --mem_gb 16" \
--s cloudsessions/lhab.mriqc.${dsv} -o /data.nfs/LHAB/logfiles/mriqc.${dsv} -w 60hours -C 15 -c 4 -m 4GB -v
 
 screen bidswrapps_start.py \
 poldracklab/mriqc:0.9.1 \
@@ -86,7 +75,7 @@ poldracklab/mriqc:0.9.1 \
 
 ## freesurfer
 ```
-dsv=v1.1.0
+dsv=v1.1.1
 image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
 instance_type=8cpu-32ram-hpc
 screen bidswrapps_start.py \
@@ -95,8 +84,8 @@ bids/freesurfer:v6.0.0-2 \
 -ra "--license_key ~/fs.key --n_cpus 8" \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
--s cloudsessions/lhab.freesurfer.${dsv} -o /data.nfs/LHAB/logfiles/freesurfer_${dsv} -w 60hours -C 15 -c 8
-
+-s cloudsessions/lhab.freesurfer.${dsv} -o /data.nfs/LHAB/logfiles/freesurfer_${dsv} -w 120hours -C 15 -c 8
+s
 
 screen bidswrapps_start.py \
 bids/freesurfer:v6.0.0-2 \
@@ -108,10 +97,33 @@ bids/freesurfer:v6.0.0-2 \
 
 ```
 
+## freesurfer qc
+```
+dsv=v1.1.1
+image_id=e7a35e07-bc5d-43f0-8249-ee93c88aa226
+instance_type=4cpu-16ram-hpc
+
+screen bidswrapps_start.py \
+fliem/freesurfer:qc_nb \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer participant \
+--docker_opt "--entrypoint=/code/run_qc.py" \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+-s cloudsessions/lhab.freesurfer.${dsv}.qc -o /data.nfs/LHAB/logfiles/freesurfer_${dsv}.qc -w 120hours -C 15 -c 1 -J 250
+
+screen bidswrapps_start.py \
+fliem/freesurfer:qc_nb \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer group \
+--docker_opt "--entrypoint=/code/run_qc.py" \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+-s cloudsessions/lhab.freesurfer.${dsv}.qc.group -o /data.nfs/LHAB/logfiles/freesurfer_${dsv}.qc.group -w 120hours -C 15 -c 1 -J 250
+
+```
 
 ## tracula
 ```
-dsv=v1.1.0
+dsv=v1.1.1
 image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
 instance_type=2cpu-8ram-hpc
 

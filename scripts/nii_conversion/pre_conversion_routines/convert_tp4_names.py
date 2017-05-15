@@ -28,7 +28,7 @@ for old_id in df.T:
     print(old_id, new_id)
 
     for f in subfolders:
-        subject_source_folder = glob(os.path.join(root_path, f, "*" + old_id + "*"))
+        subject_source_folder = sorted(glob(os.path.join(root_path, f, "*" + old_id + "*")))
         if subject_source_folder:
             subject_source_folder = subject_source_folder[0]
             break
@@ -38,7 +38,7 @@ for old_id in df.T:
     print(subject_source_folder, subject_target_folder)
 
     os.chdir(subject_source_folder)
-    file_list = glob("*")
+    file_list = sorted(glob("*"))
     if file_list[0].startswith("lhab_"):
         # only update subject name
         for f_old in file_list:
@@ -52,7 +52,7 @@ for old_id in df.T:
         for m_old, m_new in mapping.items():
             print(m_old, m_new)
             #            files= list(set(["_".join(f.split("_")[5:]).split(".")[0]) for f in glob("*" + m_old + "*")]))
-            files = [f for f in glob("*" + m_old + "*")]
+            files = [f for f in sorted(glob("*" + m_old + "*"))]
             files = list(set([f.split(".")[0] for f in files]))
 
             assert len(files) < 3, "something went wrong %s" % files
@@ -71,7 +71,7 @@ for old_id in df.T:
                     shutil.copy(cp_source, cp_dest)
                     info.append("%s %s\n" % (cp_source, cp_dest))
 
-    pdf = glob("*.pdf")
+    pdf = sorted(glob("*.pdf"))
     if pdf:
         cp_dest = os.path.join(subject_target_folder, "lhab_{id}_T4.pdf".format(id=new_id))
         shutil.copy(pdf[0], cp_dest)

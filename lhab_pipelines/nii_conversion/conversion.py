@@ -1,6 +1,7 @@
 import datetime as dt
 import os
 from glob import glob
+import numpy as np
 
 from nipype.interfaces.dcm2nii import Dcm2niix
 from nipype.interfaces.fsl import Reorient2Std
@@ -9,7 +10,7 @@ import lhab_pipelines
 from lhab_pipelines.utils import add_info_to_json
 from .utils import get_public_sub_id, get_clean_ses_id, get_clean_subject_id, \
     update_sub_scans_file, deface_data, dwi_treat_bvecs, add_additional_bids_parameters_from_par, \
-    add_flip_angle_from_par, add_total_readout_time_from_par, parse_physio, save_physio
+    add_flip_angle_from_par, add_total_readout_time_from_par, parse_physio, save_physio, get_par_info
 
 
 def submit_single_subject(old_subject_id, ses_id_list, raw_dir, in_ses_folder, output_dir, info_list,
@@ -86,7 +87,12 @@ def convert_modality(old_subject_id, old_ses_id, output_dir, bids_name, bids_mod
         if only_use_last:
             par_file_list = par_file_list[-1:]
 
-        for run_id, par_file in enumerate(par_file_list, 1):
+        # sort files by acquision number
+        par_acq_nr = np.array([get_par_info(par_file, "acquisition_nr")["acquisition_nr"] for par_file in
+                               par_file_list])
+        sort_index = np.argsort(par_acq_nr)
+
+        for run_id, par_file in enumerate(np.array(par_file_list)[sort_index].tolist(), 1):
             # put together bids file name
             # bids run
             bids_run = "run-" + str(run_id)
