@@ -34,6 +34,7 @@ import logging
 import getpass
 import csv
 from pybis import Openbis
+import time
 
 log = logging.getLogger()
 log.addHandler(logging.StreamHandler())
@@ -95,11 +96,17 @@ def main(opts, session):
                 subject = filename.split("_")[0]
                 subject_id = subject.split("-")[1]
                 sample = session.new_sample(space="FLIEM", type="SUBJECT_MRI", experiment="/FLIEM/LHAB_TEST/E183",\
-                        parents=subjects_list.get(subject_id), attachments=os.path.join(root, f),\
-                        props={"subject_id":subject_id,"mri_acquisition":filename.split("_")[2],\
+                        parents=subjects_list.get(subject_id), props={"subject_id":subject_id,"mri_acquisition":filename.split("_")[2],\
                         "mri_modality":filename.split("_")[4],"mri_run":filename.split("_")[1],\
                         "mri_sequence":filename.split("_")[3]})
                 sample.save()
+                path = os.path.abspath(os.path.join(root, f))
+                print (path)
+                time.sleep(5)
+                print(sample.identifier)
+                dataset = session.new_dataset(type="ANALYZED_DATA", experiment="/FLIEM/LHAB_TEST/E183", sample=sample.identifier, files=['./sub-lhabX0015_ses-tp1_acq-ap_run-1_dwi.bval'])
+                dataset
+                dataset.save()
 
 if __name__ == "__main__":
     opts = setup()
