@@ -79,22 +79,21 @@ if __name__ == "__main__":
     ]
 
 
-    #fixme
-    # print("Exporting demos...")
-    # calc_demos(output_dir,
-    #            ses_id_list,
-    #            raw_dir,
-    #            in_ses_folder,
-    #            demo_file,
-    #            pwd,
-    #            use_new_ids=use_new_ids,
-    #            new_id_lut_file=new_id_lut_file,
-    #            public_output=public_output,
-    #            )
-    #
-    # print("Collecting scan durations...")
-    # get_scan_duration(output_dir)
-    #
+    print("Exporting demos...")
+    calc_demos(output_dir,
+               ses_id_list,
+               raw_dir,
+               in_ses_folder,
+               demo_file,
+               pwd,
+               use_new_ids=use_new_ids,
+               new_id_lut_file=new_id_lut_file,
+               public_output=public_output,
+               )
+
+    print("Collecting scan durations...")
+    get_scan_duration(output_dir)
+
     print("\n Check that all subjecst are present and compare par and nii count, export nii count...")
     compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_folder, info_list, new_id_lut_file,
                     excluded_dir)
