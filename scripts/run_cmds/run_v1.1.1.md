@@ -42,7 +42,7 @@ fliem/lhab_pipelines:${swv} \
 checks data and reduces subjects data
 
 ```
-swv=v1.1.5
+swv=v1.1.6
 dsv=v1.1.1
 vshort=v1.1.1
 sfile=lhab_all_subjects.tsv
