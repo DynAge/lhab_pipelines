@@ -17,7 +17,7 @@ poldracklab/mriqc:0.9.1 \
 
 ## FS
 ```
-image_id=36b38ba4-83a4-41e5-938b-8c1a9b0ff45c
+image_id=ede48e0b-512a-4da2-8300-631981f269de
 instance_type=4cpu-16ram-hpc
 screen bidswrapps_start.py \
 fliem/freesurfer:v6.0.0-3-FSv5.3.0-1 \
@@ -29,7 +29,7 @@ fliem/freesurfer:v6.0.0-3-FSv5.3.0-1 \
 
 
 
-image_id=36b38ba4-83a4-41e5-938b-8c1a9b0ff45c
+image_id=ede48e0b-512a-4da2-8300-631981f269de
 instance_type=4cpu-16ram-hpc
 screen bidswrapps_start.py \
 fliem/freesurfer:v6.0.0-3-FSv5.3.0-1 \
@@ -38,4 +38,27 @@ fliem/freesurfer:v6.0.0-3-FSv5.3.0-1 \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
 -s cloudsessions/camcan.freesurfer.group2 -o /data.nfs/camcan/logfiles/camcan.freesurfer.group2 -w 60hours -C 15 -c 8 -v
+```
+
+
+## baracus
+```
+image_id=ede48e0b-512a-4da2-8300-631981f269de
+instance_type=4cpu-16ram-hpc
+screen bidswrapps_start.py \
+fliem/baracus:0.1.2.dev \
+/data.nfs/camcan/output/freesurfer_v53 /data.nfs/camcan/output/baracus participant \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+--no-input-folder-ro \
+-s cloudsessions/camcan.baracus.participants -o /data.nfs/camcan/logfiles/camcan.baracus.participants -w 120hours -C 15 -c 1 -J 350 -v
+
+screen bidswrapps_start.py \
+fliem/baracus:0.1.2.dev \
+/data.nfs/camcan/output/freesurfer_v53 /data.nfs/camcan/output/baracus group \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+--no-input-folder-ro \
+-s cloudsessions/camcan.baracus.group -o /data.nfs/camcan/logfiles/camcan.baracus.group -w 120hours -C 15 -c 1 -J 350 -v
+
 ```

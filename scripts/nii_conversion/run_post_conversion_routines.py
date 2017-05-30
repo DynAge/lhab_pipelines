@@ -46,6 +46,7 @@ if __name__ == "__main__":
         private_str = ""
 
     output_dir = os.path.join(args.output_base_dir, "LHAB_" + args.ds_version + private_str, "sourcedata")
+    excluded_dir = os.path.join(args.output_base_dir, "LHAB_" + args.ds_version + private_str, "excluded")
 
     ###
     if args.participant_file:
@@ -78,7 +79,6 @@ if __name__ == "__main__":
     ]
 
 
-
     print("Exporting demos...")
     calc_demos(output_dir,
                ses_id_list,
@@ -95,7 +95,8 @@ if __name__ == "__main__":
     get_scan_duration(output_dir)
 
     print("\n Check that all subjecst are present and compare par and nii count, export nii count...")
-    compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_folder, info_list, new_id_lut_file)
+    compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_folder, info_list, new_id_lut_file,
+                    excluded_dir)
 
     print("\nReducing scans file...")
     reduce_sub_files(output_dir, "scans.tsv", "scans.tsv")
