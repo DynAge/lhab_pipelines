@@ -144,7 +144,8 @@ def get_scan_duration(output_dir, modality="func", task="rest"):
     to_tsv(scan_duration, output_file)
 
 
-def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_folder, info_list, new_id_lut_file):
+def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_folder, info_list, new_id_lut_file,
+                    excluded_dir=None):
     """
     - Checks that all subjects from subject list are in sourcedata
     - Checks that par and nii filecount agrees
@@ -189,14 +190,25 @@ def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_fo
                     dir_str = "_dir-" + info["direction"]
                 else:
                     dir_str = ""
-                nii_search_str = os.path.join(sub_ses_nii_dir, info["bids_modality"], "*" + acq_str + "*" + dir_str
-                                              + "*" + info["bids_name"] + "*.nii.gz")
+                nii_search_str = os.path.join(sub_ses_nii_dir, info["bids_modality"], "sub-" + new_sub_id + "_ses-" +
+                                              new_ses_id + "*" + acq_str + "*" + dir_str + "*" +
+                                              info["bids_name"] + "*.nii.gz")
                 nii_f = sorted(glob(nii_search_str))
                 n_files_nifti = len(nii_f)
 
-                c = info["bids_modality"] + "_" + info["bids_name"] + \
-                    acq_str.replace("-", "") + dir_str.replace("-", "")
+                # check excluded_dir for files
+                nii_search_str = os.path.join(excluded_dir, info["bids_modality"], "sub-" + new_sub_id + "_ses-" +
+                                              new_ses_id + "*" + acq_str + "*" + dir_str + "*" +
+                                              info["bids_name"] + "*.nii.gz")
+                nii_f_excluded = sorted(glob(nii_search_str))
+                n_files_nifti_excluded = len(nii_f_excluded)
+                n_files_nifti += n_files_nifti_excluded
+                if n_files_nifti_excluded:
+                    print("files found in excluded dir. %s %s %s %s" % (
+                        new_sub_id, new_ses_id, par_search_str, nii_search_str))
 
+                c = info["bids_modality"] + "_" + info["bids_name"] + acq_str.replace("-", "") + dir_str.replace(
+                    "-", "")
                 n_files[c] = [n_files_nifti]
 
                 if not n_files_par == n_files_nifti:
@@ -213,6 +225,16 @@ def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_fo
                                                        dir_str + "*" + info["bids_name"] + "*_physio.tsv")
                     phys_nii_f = sorted(glob(phys_nii_search_str))
                     phys_n_files_nifti = len(phys_nii_f)
+
+                    # check excluded_dir for files
+                    phys_nii_search_str = os.path.join(excluded_dir, info["bids_modality"], "*" + acq_str + "*" +
+                                                       dir_str + "*" + info["bids_name"] + "*_physio.tsv")
+                    phys_nii_f_excluded = sorted(glob(phys_nii_search_str))
+                    phys_n_files_nifti_excluded = len(phys_nii_f_excluded)
+                    phys_n_files_nifti += phys_n_files_nifti_excluded
+                    if phys_n_files_nifti_excluded:
+                        print("files found in excluded dir. %s %s %s %s" % (
+                            new_sub_id, new_ses_id, par_search_str, phys_nii_search_str))
 
                     c = info["bids_modality"] + "_" + info["bids_name"] + \
                         acq_str.replace("-", "") + dir_str.replace("-", "") + "_physio"

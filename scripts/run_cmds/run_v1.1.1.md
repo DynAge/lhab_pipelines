@@ -42,7 +42,7 @@ fliem/lhab_pipelines:${swv} \
 checks data and reduces subjects data
 
 ```
-swv=v1.1.4
+swv=v1.1.5
 dsv=v1.1.1
 vshort=v1.1.1
 sfile=lhab_all_subjects.tsv
@@ -155,4 +155,30 @@ bids/tracula:v6.0.0-2 \
 --instance_type ${instance_type} \
 -s cloudsessions/lhab.tracula.group2.${dsv} -o /data.nfs/LHAB/logfiles/tracula_${dsv}_group2 -w 60hours -C 15 -c 2 -v
 
+```
+
+
+
+
+## baracus
+```
+
+dsv=v1.1.1
+image_id=09650c64-6818-47c3-b744-6db02e352466
+instance_type=4cpu-16ram-hpc
+screen bidswrapps_start.py \
+fliem/baracus:0.1.4.dev \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v53 /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/baracus participant \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+--no-input-folder-ro \
+-s cloudsessions/lhab.baracus.participants -o /data.nfs/LHAB/logfiles/lhab.baracus.participants -w 120hours -C 15 -c 1 -J 350 -v
+
+screen bidswrapps_start.py \
+fliem/baracus:0.1.4.dev \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v53 /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/baracus group \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+--no-input-folder-ro \
+-s cloudsessions/lhab.baracus.group -o /data.nfs/LHAB/logfiles/lhab.baracus.group -w 120hours -C 15 -c 1 -J 450 -v
 ```
