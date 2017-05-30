@@ -202,7 +202,8 @@ def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_fo
                                               info["bids_name"] + "*.nii.gz")
                 nii_f_excluded = sorted(glob(nii_search_str))
                 n_files_nifti_excluded = len(nii_f_excluded)
-                n_files_nifti += n_files_nifti_excluded
+                n_files_nifti_total = n_files_nifti + n_files_nifti_excluded
+
                 if n_files_nifti_excluded:
                     print("files found in excluded dir. %s %s %s %s" % (
                         new_sub_id, new_ses_id, par_search_str, nii_search_str))
@@ -211,7 +212,7 @@ def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_fo
                     "-", "")
                 n_files[c] = [n_files_nifti]
 
-                if not n_files_par == n_files_nifti:
+                if not n_files_par == n_files_nifti_total:
                     raise Exception("missmatch between par and nii file count %s %s %s %s" % (new_sub_id, new_ses_id,
                                                                                               par_search_str,
                                                                                               nii_search_str))
@@ -231,7 +232,7 @@ def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_fo
                                                        dir_str + "*" + info["bids_name"] + "*_physio.tsv")
                     phys_nii_f_excluded = sorted(glob(phys_nii_search_str))
                     phys_n_files_nifti_excluded = len(phys_nii_f_excluded)
-                    phys_n_files_nifti += phys_n_files_nifti_excluded
+                    phys_n_files_nifti_total = phys_n_files_nifti + phys_n_files_nifti_excluded
                     if phys_n_files_nifti_excluded:
                         print("files found in excluded dir. %s %s %s %s" % (
                             new_sub_id, new_ses_id, par_search_str, phys_nii_search_str))
@@ -240,7 +241,7 @@ def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_fo
                         acq_str.replace("-", "") + dir_str.replace("-", "") + "_physio"
                     n_files[c] = [phys_n_files_nifti]
 
-                    if not phys_n_files_par == phys_n_files_nifti:
+                    if not phys_n_files_par == phys_n_files_nifti_total:
                         raise Exception(
                             "missmatch between par and nii file count %s %s %s %s" % (new_sub_id, new_ses_id,
                                                                                       phys_par_search_str,
