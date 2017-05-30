@@ -1,3 +1,6 @@
+* v1.1.6
+    * handles excluded files in post conversion checks
+
 * v1.1.5
     * added exclude bad dwi scans
 
