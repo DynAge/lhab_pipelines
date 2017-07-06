@@ -85,6 +85,12 @@ for source_str, target_str in mapping.items():
                     log_str = "SCANPHYSLOG*{:%H%M%S}.log".format(log_time)
                     phys_files += sorted(glob(log_str))
 
+                # new naming scheme has sequence in it
+                if len(phys_files) == 0:
+                    log_str = "SCANPHYSLOG*{seq}.log".format(seq=source_str)
+                    phys_files += sorted(glob(log_str))
+
+
                 if len(phys_files) == 0:
                     warn("No log file found %s %s" % (source_str, log_str))
                 elif len(phys_files) > 1:
