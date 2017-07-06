@@ -17,12 +17,18 @@ print("X X " * 10 + "\n\n")
 tp = "T5"
 mapping = {"*resting2000*": "lhab_{sub}_fmri_{tp}",
            "*resting_pa*": "lhab_{sub}_fmri_pa_{tp}",
+           "*restingpa*": "lhab_{sub}_fmri_pa_{tp}",
            "*dti_high*": "lhab_{sub}_dti_{tp}",
+           "*dtihigh*": "lhab_{sub}_dti_{tp}",
            "*dti_nodif_ap*": "lhab_{sub}_dti_ap_{tp}",
+           "*dtinodifap*": "lhab_{sub}_dti_ap_{tp}",
            "*dti_nodif_pa*": "lhab_{sub}_dti_pa_{tp}",
+           "*dtinodifpa*": "lhab_{sub}_dti_pa_{tp}",
            "*b0map*": "lhab_{sub}_dti_b0_{tp}",
            "*flair_long*": "lhab_{sub}_2dflair_{tp}",
+           "*flairlong*": "lhab_{sub}_2dflair_{tp}",
            "*3d_brain_view*": "lhab_{sub}_3dflair_{tp}",
+           "*3dbrainview*": "lhab_{sub}_3dflair_{tp}",
            "*t2w*": "lhab_{sub}_t2w_{tp}",
            "*t1w*": "lhab_{sub}_t1w_{run}_{tp}"}
 
@@ -31,6 +37,16 @@ output_dir = os.path.join(os.getcwd(), "../../data_quarant", "lhab_{sub}_{tp}_ra
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 print(output_dir)
+
+g = sorted(glob("*.pdf"))
+if g:
+    if len(g) > 1:
+        raise Exception()
+    else:
+        f_source = g[0]
+        f_target = os.path.join(output_dir, "lhab_{sub}_{tp}.pdf".format(sub=args.lhab_id, tp=tp.lower(),))
+        shutil.copy(f_source, f_target)
+        print("copy: ", f_source, f_target)
 
 for source_str, target_str in mapping.items():
     g = sorted(glob(source_str + ".par"))
