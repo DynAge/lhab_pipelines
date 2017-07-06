@@ -42,7 +42,7 @@ fliem/lhab_pipelines:${swv} \
 checks data and reduces subjects data
 
 ```
-swv=v1.1.6
+swv=v1.1.7
 dsv=v1.1.1
 vshort=v1.1.1
 sfile=lhab_all_subjects.tsv
@@ -93,6 +93,7 @@ bids/freesurfer:v6.0.0-2 \
 -ra "--license_key ~/fs.key --n_cpus 8 --parcellations aparc aparc.a2009s --measurements area volume thickness thicknessstd meancurv gauscurv foldind curvind" \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
+-pel lhabX0110 \
 -s cloudsessions/lhab.freesurfer.group2.${dsv} -o /data.nfs/LHAB/logfiles/freesurfer_${dsv}.group2 -w 60hours -C 15 -c 8
 
 ```
@@ -124,11 +125,11 @@ fliem/freesurfer:qc_nb \
 ## tracula
 ```
 dsv=v1.1.1
-image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
+image_id=5196f806-3598-4139-b970-d6005ecd041b
 instance_type=2cpu-8ram-hpc
 
 screen bidswrapps_start.py \
-bids/tracula:v6.0.0-2 \
+bids/tracula:v6.0.0-3 \
 /data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/tracula participant \
 -ra "--license_key ~/fs.key --freesurfer_dir /data/freesurfer" \
 --volume /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer/:/data/freesurfer \
@@ -138,7 +139,7 @@ bids/tracula:v6.0.0-2 \
 
 
 screen bidswrapps_start.py \
-bids/tracula:v6.0.0-2 \
+bids/tracula:v6.0.0-3 \
 /data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/tracula group1 \
 -ra "--license_key ~/fs.key --freesurfer_dir /data/freesurfer" \
 --volume /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer/:/data/freesurfer \
@@ -147,7 +148,7 @@ bids/tracula:v6.0.0-2 \
 -s cloudsessions/lhab.tracula.group1.${dsv} -o /data.nfs/LHAB/logfiles/tracula_${dsv}_group1 -w 60hours -C 15 -c 2 -v
 
 screen bidswrapps_start.py \
-bids/tracula:v6.0.0-2 \
+bids/tracula:v6.0.0-3 \
 /data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/tracula group2 \
 -ra "--license_key ~/fs.key --freesurfer_dir /data/freesurfer" \
 --volume /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer/:/data/freesurfer \

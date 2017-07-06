@@ -14,8 +14,30 @@ poldracklab/mriqc:0.9.1 \
 -s cloudsessions/camcan.mriqc.participants -o /data.nfs/camcan/logfiles/camcan.mriqc.participants -w 120hours -C 15 -c 4 -m 4GB -v`
 ```
 
-
 ## FS
+
+
+
+image_id=71afdf61-a328-40bf-b66f-d40cdf7d9064
+instance_type=4cpu-16ram-hpc
+screen bidswrapps_start.py \
+bids/freesurfer:v6.0.0-4 \
+/data.nfs/camcan/dl/cc700/mri/pipeline/release004/BIDSsep/anat /data.nfs/camcan/output/freesurfer participant \
+-ra "--license_key ~/fs.key --n_cpus 4" \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+-s cloudsessions/camcan.freesurfer.participants -o /data.nfs/camcan/logfiles/camcan.freesurfer.participants -w 120hours -C 15 -c 4 -J 350 -v -N
+
+bids/freesurfer:v6.0.0-4 \
+/data.nfs/camcan/dl/cc700/mri/pipeline/release004/BIDSsep/anat /data.nfs/camcan/output/freesurfer group2 \
+-ra "--license_key ~/fs.key --n_cpus 4 --parcellations aparc aparc.a2009s --measurements area volume thickness thicknessstd meancurv gauscurv foldind curvind" \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+-s cloudsessions/camcan.freesurfer.group2 -o /data.nfs/camcan/logfiles/camcan.freesurfer.group2 -w 60hours -C 15 -c 8 -v
+
+
+
+## FS 5.3
 ```
 image_id=ede48e0b-512a-4da2-8300-631981f269de
 instance_type=4cpu-16ram-hpc
@@ -43,18 +65,19 @@ fliem/freesurfer:v6.0.0-3-FSv5.3.0-1 \
 
 ## baracus
 ```
-image_id=ede48e0b-512a-4da2-8300-631981f269de
+image_id=221affc1-f5ec-4212-a9c0-32a975737edb
 instance_type=4cpu-16ram-hpc
 screen bidswrapps_start.py \
-fliem/baracus:0.1.2.dev \
+fliem/baracus:0.1.5.dev.rc1 \
 /data.nfs/camcan/output/freesurfer_v53 /data.nfs/camcan/output/baracus participant \
+-ra "--models Liem2016__OCI_norm Liem2016__full_2samp_training" \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
 --no-input-folder-ro \
 -s cloudsessions/camcan.baracus.participants -o /data.nfs/camcan/logfiles/camcan.baracus.participants -w 120hours -C 15 -c 1 -J 350 -v
 
 screen bidswrapps_start.py \
-fliem/baracus:0.1.2.dev \
+fliem/baracus:0.1.5.dev.rc1 \
 /data.nfs/camcan/output/freesurfer_v53 /data.nfs/camcan/output/baracus group \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
