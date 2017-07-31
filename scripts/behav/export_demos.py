@@ -16,5 +16,8 @@ if __name__ == "__main__":
         df["ID"] = get_public_sub_id(["lhab_" + str(s) for s in df["ID"]], s_id_lut)
         df.sort_values("ID", inplace=True)
 
+        if f.startswith("Gender"):
+            df.replace({"Gender": {1: "M", 2: "F"}}, inplace=True)
+
         out_file = os.path.join(out_dir, f)
         df.to_excel(out_file, na_rep="NA", index=False)
