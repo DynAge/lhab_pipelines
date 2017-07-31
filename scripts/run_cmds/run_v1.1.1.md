@@ -3,7 +3,7 @@ This version takes data from v1.1.0 and removes t1w images
 ```
 swv=v1.1.4
 dsv=v1.1.1
-image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
+image_id=9f141c0a-3b41-483c-acd8-4975ad610a18
 instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
@@ -22,7 +22,7 @@ fliem/lhab_pipelines:${swv} \
 ```
 swv=v1.1.5
 dsv=v1.1.1
-image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
+image_id=9f141c0a-3b41-483c-acd8-4975ad610a18
 instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
@@ -59,7 +59,7 @@ fliem/lhab_pipelines:${swv} python /code/lhab_pipelines/scripts/nii_conversion/r
 Rerun group step
 ```
 dsv=v1.1.1
-image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
+image_id=9f141c0a-3b41-483c-acd8-4975ad610a18
 instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
@@ -76,7 +76,7 @@ poldracklab/mriqc:0.9.1 \
 ## freesurfer
 ```
 dsv=v1.1.1
-image_id=2b0bc6f8-23a5-4654-9229-f3aef5fd5c32
+image_id=9f141c0a-3b41-483c-acd8-4975ad610a18
 instance_type=8cpu-32ram-hpc
 screen bidswrapps_start.py \
 bids/freesurfer:v6.0.0-2 \
@@ -101,7 +101,7 @@ bids/freesurfer:v6.0.0-2 \
 ## freesurfer qc
 ```
 dsv=v1.1.1
-image_id=eed83290-1d28-4392-a616-59a719c8f417
+image_id=9f141c0a-3b41-483c-acd8-4975ad610a18
 instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
@@ -125,7 +125,7 @@ fliem/freesurfer:qc_nb \
 ## tracula
 ```
 dsv=v1.1.1
-image_id=5196f806-3598-4139-b970-d6005ecd041b
+image_id=9f141c0a-3b41-483c-acd8-4975ad610a18
 instance_type=2cpu-8ram-hpc
 
 screen bidswrapps_start.py \
@@ -135,7 +135,7 @@ bids/tracula:v6.0.0-3 \
 --volume /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer/:/data/freesurfer \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
--s cloudsessions/lhab.tracula.${dsv} -o /data.nfs/LHAB/logfiles/tracula_${dsv} -w 60hours -C 15 -c 2
+-s cloudsessions/lhab.tracula.${dsv} -o /data.nfs/LHAB/logfiles/tracula_${dsv} -w 120hours -C 15 -c 2
 
 
 screen bidswrapps_start.py \
