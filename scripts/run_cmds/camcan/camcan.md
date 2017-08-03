@@ -17,8 +17,8 @@ poldracklab/mriqc:0.9.1 \
 ## FS
 
 
-
-image_id=71afdf61-a328-40bf-b66f-d40cdf7d9064
+```
+image_id=9f141c0a-3b41-483c-acd8-4975ad610a18
 instance_type=4cpu-16ram-hpc
 screen bidswrapps_start.py \
 bids/freesurfer:v6.0.0-4 \
@@ -28,13 +28,14 @@ bids/freesurfer:v6.0.0-4 \
 --instance_type ${instance_type} \
 -s cloudsessions/camcan.freesurfer.participants -o /data.nfs/camcan/logfiles/camcan.freesurfer.participants -w 120hours -C 15 -c 4 -J 350 -v -N
 
+screen bidswrapps_start.py \
 bids/freesurfer:v6.0.0-4 \
 /data.nfs/camcan/dl/cc700/mri/pipeline/release004/BIDSsep/anat /data.nfs/camcan/output/freesurfer group2 \
 -ra "--license_key ~/fs.key --n_cpus 4 --parcellations aparc aparc.a2009s --measurements area volume thickness thicknessstd meancurv gauscurv foldind curvind" \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
 -s cloudsessions/camcan.freesurfer.group2 -o /data.nfs/camcan/logfiles/camcan.freesurfer.group2 -w 60hours -C 15 -c 8 -v
-
+```
 
 
 ## FS 5.3
