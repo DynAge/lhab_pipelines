@@ -29,7 +29,8 @@ def long_to_wide(long, index, columns, values, nonumeric=False):
 
 
 def export_behav_with_new_id(orig_file, s_id_lut):
-    df_orig = pd.read_excel(orig_file, na_values=["NA01", "NA02", "NA03", "NA04", "NA4", "X", 888, 999])
+    df_orig = pd.read_excel(orig_file, na_values=["NA01", "NA02", "NA03", "NA04", "NA4", "NA1", "NA2", "TL", "X", 888,
+                                                  999])
     # na_values seems not to catch numbers consistently
     df_orig.replace({888: np.nan, 999: np.nan}, inplace=True)
 
@@ -60,6 +61,9 @@ def export_behav_with_new_id(orig_file, s_id_lut):
 
     df_wide.sort_values(by=["subject_id", "session_id"], inplace=True)
     df_long.sort_values(by=["subject_id", "session_id"], inplace=True)
+
+    df_long["conversion_date"] = pd.datetime.now().date().isoformat()
+    df_wide["conversion_date"] = pd.datetime.now().date().isoformat()
     return df_long, df_wide
 
 
