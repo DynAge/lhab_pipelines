@@ -57,6 +57,9 @@ def export_behav_with_new_id(orig_file, s_id_lut):
     df_long.dropna(inplace=True)
     df_wide = long_to_wide(df_long, ["subject_id", "session_id"], ["variable"], ["value"])
     df_wide.rename(columns=lambda c: c.split("test_score_")[-1], inplace=True)
+
+    df_wide.sort_values(by=["subject_id", "session_id"], inplace=True)
+    df_long.sort_values(by=["subject_id", "session_id"], inplace=True)
     return df_long, df_wide
 
 
