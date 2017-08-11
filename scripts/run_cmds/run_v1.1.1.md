@@ -3,7 +3,7 @@ This version takes data from v1.1.0 and removes t1w images
 ```
 swv=v1.1.4
 dsv=v1.1.1
-image_id=9f141c0a-3b41-483c-acd8-4975ad610a18
+image_id=395115ed-d2c3-4e9f-89ee-6ed5c245d60a
 instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
@@ -22,7 +22,7 @@ fliem/lhab_pipelines:${swv} \
 ```
 swv=v1.1.5
 dsv=v1.1.1
-image_id=9f141c0a-3b41-483c-acd8-4975ad610a18
+image_id=395115ed-d2c3-4e9f-89ee-6ed5c245d60a
 instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
@@ -59,7 +59,7 @@ fliem/lhab_pipelines:${swv} python /code/lhab_pipelines/scripts/nii_conversion/r
 Rerun group step
 ```
 dsv=v1.1.1
-image_id=9f141c0a-3b41-483c-acd8-4975ad610a18
+image_id=395115ed-d2c3-4e9f-89ee-6ed5c245d60a
 instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
@@ -76,11 +76,11 @@ poldracklab/mriqc:0.9.1 \
 ## freesurfer
 ```
 dsv=v1.1.1
-image_id=9f141c0a-3b41-483c-acd8-4975ad610a18
+image_id=395115ed-d2c3-4e9f-89ee-6ed5c245d60a
 instance_type=8cpu-32ram-hpc
 screen bidswrapps_start.py \
 bids/freesurfer:v6.0.0-2 \
-/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer participant \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2 participant \
 -ra "--license_key ~/fs.key --n_cpus 8" \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
@@ -89,7 +89,7 @@ s
 
 screen bidswrapps_start.py \
 bids/freesurfer:v6.0.0-2 \
-/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer group2 \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2 group2 \
 -ra "--license_key ~/fs.key --n_cpus 8 --parcellations aparc aparc.a2009s --measurements area volume thickness thicknessstd meancurv gauscurv foldind curvind" \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
@@ -101,12 +101,12 @@ bids/freesurfer:v6.0.0-2 \
 ## freesurfer qc
 ```
 dsv=v1.1.1
-image_id=9f141c0a-3b41-483c-acd8-4975ad610a18
+image_id=395115ed-d2c3-4e9f-89ee-6ed5c245d60a
 instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
 fliem/freesurfer:qc_nb \
-/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer participant \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2 participant \
 --docker_opt "--entrypoint=/code/run_qc.py" \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
@@ -114,7 +114,7 @@ fliem/freesurfer:qc_nb \
 
 screen bidswrapps_start.py \
 fliem/freesurfer:qc_nb \
-/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer group \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2 group \
 --docker_opt "--entrypoint=/code/run_qc.py" \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
@@ -125,36 +125,36 @@ fliem/freesurfer:qc_nb \
 ## tracula
 ```
 dsv=v1.1.1
-image_id=9f141c0a-3b41-483c-acd8-4975ad610a18
-instance_type=2cpu-8ram-hpc
+image_id=395115ed-d2c3-4e9f-89ee-6ed5c245d60a
+instance_type=8cpu-32ram-hpc
 
 screen bidswrapps_start.py \
-bids/tracula:v6.0.0-3 \
-/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/tracula participant \
--ra "--license_key ~/fs.key --freesurfer_dir /data/freesurfer" \
---volume /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer/:/data/freesurfer \
+bids/tracula:v6.0.0-4 \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/tracula_v6.0.0-4 participant \
+-ra "--license_key ~/fs.key --freesurfer_dir /data/freesurfer --n_cpus 4" \
+--volume /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2/:/data/freesurfer \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
--s cloudsessions/lhab.tracula.${dsv} -o /data.nfs/LHAB/logfiles/tracula_${dsv} -w 120hours -C 15 -c 2
+-s cloudsessions/lhab.tracula_v6.0.0-4_${dsv} -o /data.nfs/LHAB/logfiles/tracula_v6.0.0-4_${dsv} -w 120hours -C 15 -c 4
 
 
 screen bidswrapps_start.py \
-bids/tracula:v6.0.0-3 \
-/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/tracula group1 \
--ra "--license_key ~/fs.key --freesurfer_dir /data/freesurfer" \
---volume /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer/:/data/freesurfer \
+bids/tracula:v6.0.0-4 \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/tracula_v6.0.0-4 group1 \
+-ra "--license_key ~/fs.key --freesurfer_dir /data/freesurfer --n_cpus 4" \
+--volume /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2/:/data/freesurfer \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
--s cloudsessions/lhab.tracula.group1.${dsv} -o /data.nfs/LHAB/logfiles/tracula_${dsv}_group1 -w 60hours -C 15 -c 2 -v
+-s cloudsessions/lhab.tracula_v6.0.0-4_group1.${dsv} -o /data.nfs/LHAB/logfiles/tracula_v6.0.0-4_${dsv}_group1 -w 60hours -C 15 -c 4 -v
 
 screen bidswrapps_start.py \
-bids/tracula:v6.0.0-3 \
-/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/tracula group2 \
--ra "--license_key ~/fs.key --freesurfer_dir /data/freesurfer" \
---volume /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer/:/data/freesurfer \
+bids/tracula:v6.0.0-4 \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/tracula_v6.0.0-4 group2 \
+-ra "--license_key ~/fs.key --freesurfer_dir /data/freesurfer --n_cpus 4" \
+--volume /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2/:/data/freesurfer \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
--s cloudsessions/lhab.tracula.group2.${dsv} -o /data.nfs/LHAB/logfiles/tracula_${dsv}_group2 -w 60hours -C 15 -c 2 -v
+-s cloudsessions/lhab.tracula_v6.0.0-4_group2.${dsv} -o /data.nfs/LHAB/logfiles/tracula_v6.0.0-4_${dsv}_group2 -w 60hours -C 15 -c 4 -v
 
 ```
 
