@@ -4,7 +4,7 @@ dsv=v1.1.1
 image_id=7ce8ca35-c757-4d76-8435-670e23894748
 screen bidswrapps_start.py \
 fliem/freesurfer_lgi:dev16 \
-/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer participant \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2/ participant \
 -ra "--license_key ~/fs.key --n_cpus 2 --wait-for-nfs" \
 --image_id ${image_id} \
 --instance_type 8cpu-32ram-hpc \
@@ -20,7 +20,7 @@ instance_type=4cpu-16ram-hpc
 
 screen bidswrapps_start.py \
 fliem/freesurfer_utils:v0.9.0 \
-/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer participant \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2/ participant \
 -ra "--license_key ~/fs.key --n_cpus 4 --workflow qcache --measurements pial_lgi --stream long " \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
