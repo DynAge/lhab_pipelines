@@ -98,6 +98,18 @@ bids/freesurfer:v6.0.0-2 \
 
 ```
 
+#### QCACHE
+    dsv=v1.1.1
+    image_id=4313d605-12f1-4c8b-979b-afb5cb2d2faf
+    instance_type=16cpu-64ram-hpc
+    screen bidswrapps_start.py \
+    fliem/freesurfer_utils:v0.9.1 \
+    /data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2 participant \
+    -ra "--license_key ~/fs.key --n_cpus 4 --workflow qcache --stream cross long" \
+    --image_id ${image_id} \
+    --instance_type ${instance_type} \
+    -s cloudsessions/lhab.fs_utils.qcache -o /data.nfs/LHAB/logfiles/fs_utils.qcache -w 120hours -C 15 -c 4 -J 150 -v
+
 ## freesurfer qc
 ```
 dsv=v1.1.1
