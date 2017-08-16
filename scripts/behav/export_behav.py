@@ -39,7 +39,7 @@ def export_behav_with_new_id(orig_file, s_id_lut):
     df_orig.rename(columns={"vp_code": "private_subject_id"}, inplace=True)
     # df_orig["private_subject_id"].replace({"vcp4 ": "vcp4"}, inplace=True)
     df_orig["private_subject_id"] = df_orig["private_subject_id"].str.strip()
-    score_cols = df_orig.columns.drop(['private_subject_id'])
+    score_cols = df_orig.columns.drop(['private_subject_id']).tolist()
     if "tp_avail" in score_cols:
         score_cols = score_cols.drop("tp_avail")
 
