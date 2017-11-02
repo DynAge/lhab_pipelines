@@ -20,7 +20,7 @@ def long_to_wide(long, index, columns, values, nonumeric=False):
 
     for i in o.T:
         out_cols.append("_".join(i))
-    out_cols = [s.replace("value_", "") for s in out_cols]
+    out_cols = [s.replace("score_value_", "") for s in out_cols]
     out_cols = [s.replace("z_", "") + "_z" if s.startswith("z_") else s for s in out_cols]
 
     wide.columns = out_cols
@@ -51,12 +51,12 @@ def export_behav_with_new_id(orig_file, s_id_lut):
 
     df_long = pd.melt(df_orig, id_vars=["subject_id"],
                       value_vars=score_cols,
-                      var_name='test_session_id', value_name="value")  # score_names[0])
+                      var_name='test_session_id', value_name="score_value")  # score_names[0])
     df_long["session_id"] = df_long["test_session_id"].apply(lambda s: s.split("_")[-1])
-    df_long["variable"] = df_long["test_session_id"].apply(lambda s: "_".join(s.split("_")[0:-1]))
+    df_long["score_name"] = df_long["test_session_id"].apply(lambda s: "_".join(s.split("_")[0:-1]))
     df_long.drop("test_session_id", axis=1, inplace=True)
     df_long.dropna(inplace=True)
-    df_wide = long_to_wide(df_long, ["subject_id", "session_id"], ["variable"], ["value"])
+    df_wide = long_to_wide(df_long, ["subject_id", "session_id"], ["score_name"], ["score_value"])
     df_wide.rename(columns=lambda c: c.split("test_score_")[-1], inplace=True)
 
     df_wide.sort_values(by=["subject_id", "session_id"], inplace=True)
