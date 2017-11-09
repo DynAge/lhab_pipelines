@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-
+import re, os
 from lhab_pipelines.nii_conversion.utils import get_public_sub_id
 
 
@@ -130,6 +130,9 @@ def set_invalid_values_to_nan(df_long, df_meta_long):
 
 
 def export_behav_with_new_id(orig_file, metadata_file, s_id_lut):
+    p = re.compile(r"(lhab_)(\w*?)(_tp)")
+    test_name = p.findall(os.path.basename(orig_file))[0][1]
+
     df_orig, df_long = load_data_excel(orig_file, s_id_lut)
     df_meta_orig, df_meta_long = load_data_excel(metadata_file, s_id_lut, tp_string_last=False)
 
@@ -145,6 +148,8 @@ def export_behav_with_new_id(orig_file, metadata_file, s_id_lut):
 
     df_wide_clean.sort_values(by=["subject_id", "session_id"], inplace=True)
     df_long_clean.sort_values(by=["subject_id", "session_id"], inplace=True)
+
+    df_long_clean["test_name"] = test_name
 
     df_long_clean["conversion_date"] = pd.datetime.now().date().isoformat()
     df_wide_clean["conversion_date"] = pd.datetime.now().date().isoformat()
