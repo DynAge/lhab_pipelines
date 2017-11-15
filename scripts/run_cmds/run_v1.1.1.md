@@ -157,6 +157,7 @@ bids/tracula:v6.0.0-4 \
 --volume /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2/:/data/freesurfer \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
+-pel lhabX0042 lhabX0150 lhabX0161 \
 -s cloudsessions/lhab.tracula_v6.0.0-4_group1.${dsv} -o /data.nfs/LHAB/logfiles/tracula_v6.0.0-4_${dsv}_group1 -w 60hours -C 15 -c 4 -v
 
 screen bidswrapps_start.py \
@@ -166,6 +167,7 @@ bids/tracula:v6.0.0-4 \
 --volume /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2/:/data/freesurfer \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
+-pel lhabX0042 lhabX0150 lhabX0161 \
 -s cloudsessions/lhab.tracula_v6.0.0-4_group2.${dsv} -o /data.nfs/LHAB/logfiles/tracula_v6.0.0-4_${dsv}_group2 -w 60hours -C 15 -c 4 -v
 
 ```
