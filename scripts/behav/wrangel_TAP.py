@@ -214,6 +214,16 @@ def strip_df(df):
     all_cols = df.columns
     c = [x for x in all_cols if x not in drop_cols]
     df = df[c]
+
+    # prepend "tap_"
+    c = df.columns.tolist()
+    c.remove("subject")
+    c.remove("session")
+
+    ren = {}
+    for co in c:
+        ren[co] = "tap_" + co
+    df.rename(columns=ren, inplace=True)
     return df
 
 # merge files
@@ -259,7 +269,7 @@ out_file = os.path.join(out_root_path, "00_TAP.tsv".format(test_name))
 dd.to_csv(out_file, sep="\t", index=False)
 
 # meta data
-dd["n_subtests_avail"] = (~dd[["al_date", "da3_date", "go1_date", "wm3_date"]].isnull()).sum(1)
+dd["n_subtests_avail"] = (~dd[["tap_al_date", "tap_da3_date", "tap_go1_date", "tap_wm3_date"]].isnull()).sum(1)
 out_file = os.path.join(out_root_path, "00_TAP_subtest_count.tsv".format(test_name))
 dd[["subject", "session", "n_subtests_avail"]].to_csv(out_file, sep="\t", index=False)
 
