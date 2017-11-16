@@ -55,6 +55,15 @@ def id_cleaning(df):
     # ID cleaning
     df = tronic_id(df)
 
+    # hard coded typo fixes:
+    df.replace({"SUBJECT": {
+        "b3ncv": "b3nv"}}, inplace=True)
+
+    # fixme
+    # drop xfx1_t5
+    ind = ~(df.SUBJECT == "xfx1_t5")
+    df = df[ind]
+
     # remove test subjects
     ind = ~(df["SUBJECT"].str.lower().str.contains("test"))
     df = df[ind].copy()
@@ -71,6 +80,7 @@ def id_cleaning(df):
     ind = ~(df.SUBJECT == "neuer_Proband")
     df = df[ind]
 
+
     return df
 
 
@@ -82,7 +92,7 @@ def date_correction(df):
     date_col = df.filter(like="_DATE").columns.tolist()[0]
     ind = df[date_col] < pd.to_datetime("2010-01-01")
     time_offset = pd.Timedelta('4377 days')
-    df[date_col] = df[date_col]
+    df["tap_orig_dat"] = df[date_col]
     df.loc[ind, date_col] = df.loc[ind, date_col] + time_offset
 
     # add cont session for merge
@@ -101,7 +111,9 @@ def drop_dups(df):
 def get_session_labels(df):
     # prepare real session dates
     testdates = pd.read_excel(
-        "/Volumes/lhab_public/03_Data/03_ComputerTests/02_TAP/10_TAP_export_Nov17/testdates.xlsx")
+        "/Volumes/lhab_public/03_Data/03_ComputerTests/02_TAP/10_TAP_export_Nov17/testdates_TAP.xlsx")
+    valid_subjects = testdates.subject.values
+
     testdates = pd.wide_to_long(testdates, ["date_tp"], i="subject", j="session")
     testdates.reset_index(inplace=True)
     testdates["session"] = "tp" + testdates["session"]
@@ -128,20 +140,37 @@ def get_session_labels(df):
     df.loc[df.tronic_session, "session"] = "tp4"
     df.sort_values(["SUBJECT", "session"], inplace=True)
 
+    # remove subjects not in testdates
+    df = df[df.SUBJECT.isin(valid_subjects)]
+
+    # hardcoded fix date
+    ind = (df.SUBJECT == "xfx1") & (df["tap_orig_dat"] == "2004-08-08")
+    df.loc[ind, "tap_orig_dat"] = pd.to_datetime("2004-08-07")
+
+    # add hardcoded mapping for cases where automitic merge is not possible (bc. of random date offset)
+    hardcoded = pd.read_excel(
+        "/Volumes/lhab_public/03_Data/03_ComputerTests/02_TAP/10_TAP_export_Nov17/hard_coded_sessions.xlsx")
+    hardcoded.sort_values(["subject", "tap_orig_dat"], inplace=True)
+    hardcoded = hardcoded[["subject", "hard_coded_session", "tap_orig_dat"]]
+    hardcoded.rename(columns={"subject": "SUBJECT"}, inplace=True)
+
+    df = pd.merge(df, hardcoded, on=["SUBJECT", "tap_orig_dat"], how="left")
+    ind = df.session.isnull()
+    df.loc[ind, "session"] = df.loc[ind, "hard_coded_session"]
     return df
 
 
 def format_output(df):
     df.rename(columns=str.lower, inplace=True)
 
-    df.drop(["tronic_session", "age"], axis=1, inplace=True)
+    df.drop(["tronic_session", "age", "hard_coded_session"], axis=1, inplace=True)
 
     # sort columns
     date_col = df.filter(like="_date").columns.tolist()[0]
     date_col
     time_col = df.filter(like="_time").columns.tolist()[0]
     time_col
-    front_cols = ["subject", "session", "date_tp", date_col, time_col, "birth"]
+    front_cols = ["subject", "session", "date_tp", date_col, "tap_orig_dat", time_col, "birth"]
     all_cols = df.columns
     back_cols = [x for x in all_cols if x not in front_cols]
     c = front_cols + back_cols
@@ -152,6 +181,7 @@ def format_output(df):
 
 def prepare_TAP_data(search_str):
     df = merge_dfs(search_str)
+    df_orig = df.copy()
 
     df = convert_dates(df)
 
@@ -168,30 +198,74 @@ def prepare_TAP_data(search_str):
     df = get_session_labels(df)
 
     df = format_output(df)
-    return df
 
+    check_for_duplicates(df)
+
+    return df, df_orig
+
+def check_for_duplicates(df):
+    ind = df.duplicated(["subject", "session"])
+    if ind.sum() > 0:
+        print(df[ind])
+        raise Exception("Duplicates")
+
+def strip_df(df):
+    drop_cols = ['date_tp', 'tap_orig_dat', 'birth', 'examin', 'number', 'sex', 'school', 'file']
+    all_cols = df.columns
+    c = [x for x in all_cols if x not in drop_cols]
+    df = df[c]
+    return df
 
 # merge files
 root_path = "/Volumes/lhab_public/03_Data/03_ComputerTests/02_TAP/10_TAP_export_Nov17/TAP_Export_Nov2017"
 out_root_path = "/Volumes/lhab_public/03_Data/03_ComputerTests/02_TAP/10_TAP_export_Nov17/TAP_cleaned_DONTEDIT"
+orig_dump_out_root_path = "/Volumes/lhab_public/03_Data/03_ComputerTests/02_TAP/10_TAP_export_Nov17/TAP_orig_dump"
 
 test_names = ["al", "da", "gonogo", "wm3"]
 
 if not os.path.isdir(out_root_path):
     os.makedirs(out_root_path)
 
+if not os.path.isdir(orig_dump_out_root_path):
+    os.makedirs(orig_dump_out_root_path)
+
+d = {}
 for test_name in test_names:
     f = "*/export_nov2017_{}_*_*.csv".format(test_name)
     search_str = os.path.join(root_path, f)
 
-    df = prepare_TAP_data(search_str)
+    df, df_orig = prepare_TAP_data(search_str)
+
+
+
 
     # output
-    seems_ok = df[~df.session.isnull()]
-    problems = df[df.session.isnull()]
+    out_file = os.path.join(orig_dump_out_root_path, "TAP_{}_orig.tsv".format(test_name))
+    df_orig.to_csv(out_file, sep="\t", index=False)
 
-    out_file = os.path.join(out_root_path, "TAP_{}_ok.tsv".format(test_name))
-    seems_ok.to_csv(out_file, sep="\t", index=False)
+    out_file = os.path.join(out_root_path, "TAP_{}.tsv".format(test_name))
+    df.to_csv(out_file, sep="\t", index=False)
 
-    out_file = os.path.join(out_root_path, "TAP_{}_session_missing.tsv".format(test_name))
-    problems.to_csv(out_file, sep="\t", index=False)
+
+    # prepare for wide df
+    df = strip_df(df)
+    d[test_name] = df.copy()
+
+
+dd = pd.merge(d["al"], d["da"], on=["subject", "session"], how="outer")
+dd = pd.merge(dd, d["gonogo"], on=["subject", "session"], how="outer")
+dd = pd.merge(dd, d["wm3"], on=["subject", "session"], how="outer")
+out_file = os.path.join(out_root_path, "00_TAP.tsv".format(test_name))
+dd.to_csv(out_file, sep="\t", index=False)
+
+# meta data
+dd["n_subtests_avail"] = (~dd[["al_date", "da3_date", "go1_date", "wm3_date"]].isnull()).sum(1)
+out_file = os.path.join(out_root_path, "00_TAP_subtest_count.tsv".format(test_name))
+dd[["subject", "session", "n_subtests_avail"]].to_csv(out_file, sep="\t", index=False)
+
+# session count
+n = dd.groupby("subject").count()[["session"]]
+n.rename(columns={"session":"n_sessions"}, inplace=True)
+n.reset_index(inplace=True)
+out_file = os.path.join(out_root_path, "00_TAP_session_count.tsv".format(test_name))
+n.to_csv(out_file, sep="\t", index=False)
