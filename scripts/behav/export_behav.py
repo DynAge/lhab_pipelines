@@ -1,15 +1,13 @@
-import os
+import os, re
 from glob import glob
 import pandas as pd
 
 from lhab_pipelines.behav.behav_utils import export_behav_with_new_id
 
 s_id_lut = "/Volumes/lhab_raw/01_RAW/00_PRIVATE_sub_lists/new_sub_id_lut.tsv"
-# fixme
-in_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/04_ready2use_test_fl/"
-# fixme
-# out_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/05_ready2_use_newIDs/"
-out_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/05_ready2_use_newIDs_test/"
+
+in_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/04_ready2use/"
+out_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/05_ready2_use_newIDs/"
 
 data_out_dir = os.path.join(out_dir, "data")
 missing_out_dir = os.path.join(out_dir, "missing_info")
@@ -21,7 +19,7 @@ for p in [out_dir, data_out_dir, missing_out_dir]:
 os.chdir(in_dir)
 
 domains = sorted(glob("*"))
-
+domains = [d for d in domains if os.path.isdir(d)]
 
 for d in domains:
     df_long = pd.DataFrame([], columns=["subject_id", "session_id", "conversion_date", "file"])
@@ -29,14 +27,17 @@ for d in domains:
     missing_info = pd.DataFrame([], columns=["subject_id", "session_id", "conversion_date", "file"])
 
     os.chdir(os.path.join(in_dir, d))
-    xl_list = sorted(glob("*.xlsx"))
+    xl_list = sorted(glob("*_data.xlsx"))
     xl_list = [x for x in xl_list if "metadata" not in x]
 
     for orig_file in xl_list:
         print(orig_file)
         data_file = os.path.join(in_dir, d, orig_file)
+        p = re.compile(r"(lhab_)(\w*?)(_data)")
+        test_name = p.findall(os.path.basename(orig_file))[0][1]
 
-        metadata_str = "_".join(orig_file.split("_")[:2]) + "*" + "_metadata.xlsx"
+        metadata_str = "lhab_{}_metadata.xlsx".format(test_name) #"_".join(orig_file.split("_")[:2]) + "*" + " \
+                                                                                                   # ""_metadata.xlsx"
         g = glob(metadata_str)
         if len(g) > 1:
             raise Exception("More than one meta data file found: {}".format(g))
