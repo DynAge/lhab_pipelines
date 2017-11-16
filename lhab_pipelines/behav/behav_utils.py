@@ -130,7 +130,7 @@ def set_invalid_values_to_nan(df_long, df_meta_long):
 
 
 def export_behav_with_new_id(orig_file, metadata_file, s_id_lut):
-    p = re.compile(r"(lhab_)(\w*?)(_tp)")
+    p = re.compile(r"(lhab_)(\w*?)(_data)")
     test_name = p.findall(os.path.basename(orig_file))[0][1]
 
     df_orig, df_long = load_data_excel(orig_file, s_id_lut)
