@@ -22,6 +22,8 @@ if __name__ == "__main__":
     else:
         fs_subjects = glob(os.path.join(args.fs_dir, "sub-*"))
 
+    # only use crossectional subjects (without long sessions, as they don't have a orig.nofix surface)
+    fs_subjects = [s for s in fs_subjects if "long" not in s]
     fs_subjects.sort()
 
     raw_out_dir = os.path.join(args.output_dir, "euler_raw_files")
@@ -32,7 +34,7 @@ if __name__ == "__main__":
     for subject_path in fs_subjects:
         subject = os.path.basename(subject_path)
         for h in ["lh", "rh"]:
-            for surf in ["white", "pial"]:
+            for surf in ["orig.nofix"]:
                 out_filename = "{s}_{h}_{surf}_euler.csv".format(s=subject, h=h, surf=surf)
                 outfile = os.path.join(raw_out_dir, out_filename)
 
@@ -46,10 +48,10 @@ if __name__ == "__main__":
                                                 stderr=subprocess.PIPE, shell=True)
                         euler_text = proc.stderr.read().decode()
 
-                        p = re.compile(r"(\d)+ --> (\d)+ holes")
+                        p = re.compile(r"(-?\d+) --> (\d+) holes")
                         euler_number, n_holes = p.findall(euler_text)[0]
 
-                        p = re.compile(r"total defect index = (\d)+")
+                        p = re.compile(r"total defect index = (\d+)")
                         total_defect_index = p.findall(euler_text)[0]
 
                         df = pd.DataFrame({"subject": [subject],
