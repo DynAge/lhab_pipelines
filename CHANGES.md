@@ -1,3 +1,6 @@
+* v1.1.10
+    * added euler calc
+
 * v1.1.6
   * fix filecount
   
