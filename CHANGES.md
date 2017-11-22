@@ -1,9 +1,9 @@
-* v1.1.10
+* v1.1.11
     * added euler calc
 
 * v1.1.6
   * fix filecount
-  
+
 * v1.1.6
     * handles excluded files in post conversion checks
 
