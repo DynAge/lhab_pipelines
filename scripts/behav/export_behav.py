@@ -63,6 +63,11 @@ for d in domains:
     c = missing_info.columns.drop(["subject_id", "session_id", "file", "conversion_date"]).tolist()
     missing_info = missing_info[["subject_id", "session_id"] + c + ["file", "conversion_date"]]
 
+    # sort rows
+    df_long.sort_values(["subject_id", "session_id"], inplace=True)
+    df_wide.sort_values(["subject_id", "session_id"], inplace=True)
+    missing_info.sort_values(["subject_id", "session_id"], inplace=True)
+
     out_file = os.path.join(data_out_dir, d + "_long.tsv")
     df_long.to_csv(out_file, index=None, sep="\t")
 

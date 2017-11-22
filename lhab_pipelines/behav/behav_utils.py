@@ -150,6 +150,7 @@ def export_behav_with_new_id(orig_file, metadata_file, s_id_lut):
     df_long_clean.sort_values(by=["subject_id", "session_id"], inplace=True)
 
     df_long_clean["test_name"] = test_name
+    missing_full_info["test_name"] = test_name
 
     df_long_clean["conversion_date"] = pd.datetime.now().date().isoformat()
     df_wide_clean["conversion_date"] = pd.datetime.now().date().isoformat()
