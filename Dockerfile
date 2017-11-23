@@ -1,9 +1,9 @@
-FROM fliem/lhab_pipelines_base:v1.0.1
+FROM fliem/lhab_pipelines_base:v1.0
 
 # tools that are in dev
 
 RUN npm install -g bids-validator@0.19.8
-
+RUN echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IC9vcHQvZnJlZXN1cmZlci9saWNlbnNlLnR4dAo=" | base64 -d | sh
 
 #### DCM2NIIX
 WORKDIR /root
