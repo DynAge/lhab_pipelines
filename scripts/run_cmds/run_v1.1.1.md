@@ -98,6 +98,26 @@ bids/freesurfer:v6.0.0-2 \
 
 ```
 
+# fixme
+#### euler
+```
+swv=v1.1.12
+dsv=v1.1.1
+image_id=
+instance_type=8cpu-32ram-hpc
+
+screen bidswrapps_start.py \
+fliem/lhab_pipelines:${swv} \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2 /derivates/freesurfer_v6.0.0-2_euler participant \
+--runscript_cmd "python /code/lhab_pipelines/scripts/freesurfer/euler.py" \
+--volume /data.nfs/license.txt:/opt/freesurfer/.license \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+-pl lhabX0001 lhabX0002 \
+-s ~/cloudsessions/lhab.fs.euler.${dsv} -o /data.nfs/LHAB/logfiles/${dsv}/fs_euler -C 15 -c 1 -v
+```
+
+
 #### QCACHE
     dsv=v1.1.1
     image_id=4313d605-12f1-4c8b-979b-afb5cb2d2faf
@@ -131,8 +151,9 @@ fliem/freesurfer:qc_nb \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
 -s cloudsessions/lhab.freesurfer.${dsv}.qc.group -o /data.nfs/LHAB/logfiles/freesurfer_${dsv}.qc.group -w 120hours -C 15 -c 1 -J 250
-
 ```
+
+
 
 ## tracula
 ```
