@@ -76,7 +76,7 @@ poldracklab/mriqc:0.9.1 \
 ## freesurfer
 ```
 dsv=v1.1.1
-image_id=395115ed-d2c3-4e9f-89ee-6ed5c245d60a
+image_id=40757134-9756-4054-9ec2-8eeaa1d8d677
 instance_type=8cpu-32ram-hpc
 screen bidswrapps_start.py \
 bids/freesurfer:v6.0.0-2 \
@@ -87,35 +87,19 @@ bids/freesurfer:v6.0.0-2 \
 -s cloudsessions/lhab.freesurfer.${dsv} -o /data.nfs/LHAB/logfiles/freesurfer_${dsv} -w 120hours -C 15 -c 8
 s
 
+
 screen bidswrapps_start.py \
-bids/freesurfer:v6.0.0-2 \
+bids/freesurfer:v6.0.1-3 \
 /data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2 group2 \
--ra "--license_key ~/fs.key --n_cpus 8 --parcellations aparc aparc.a2009s --measurements area volume thickness thicknessstd meancurv gauscurv foldind curvind" \
+-ra "--license_file  /opt/freesurfer/.license --n_cpus 8 --parcellations aparc aparc.a2009s --measurements area volume thickness thicknessstd meancurv gauscurv foldind curvind" \
 --image_id ${image_id} \
 --instance_type ${instance_type} \
+--volume /data.nfs/license.txt:/opt/freesurfer/.license \
 -pel lhabX0110 \
 -s cloudsessions/lhab.freesurfer.group2.${dsv} -o /data.nfs/LHAB/logfiles/freesurfer_${dsv}.group2 -w 60hours -C 15 -c 8
 
 ```
-
-# fixme
-#### euler
-```
-swv=v1.1.12
-dsv=v1.1.1
-image_id=
-instance_type=8cpu-32ram-hpc
-
-screen bidswrapps_start.py \
-fliem/lhab_pipelines:${swv} \
-/data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/freesurfer_v6.0.0-2 /derivates/freesurfer_v6.0.0-2_euler participant \
---runscript_cmd "python /code/lhab_pipelines/scripts/freesurfer/euler.py" \
---volume /data.nfs/license.txt:/opt/freesurfer/.license \
---image_id ${image_id} \
---instance_type ${instance_type} \
--pl lhabX0001 lhabX0002 \
--s ~/cloudsessions/lhab.fs.euler.${dsv} -o /data.nfs/LHAB/logfiles/${dsv}/fs_euler -C 15 -c 1 -v
-```
+For the group2 step version 6.0.1-3 is used to extract euler numbers.
 
 
 #### QCACHE
