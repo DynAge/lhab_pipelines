@@ -155,3 +155,4 @@ def export_behav_with_new_id(orig_file, metadata_file, s_id_lut):
     df_long_clean["conversion_date"] = pd.datetime.now().date().isoformat()
     df_wide_clean["conversion_date"] = pd.datetime.now().date().isoformat()
     return df_long_clean, df_wide_clean, missing_full_info
+

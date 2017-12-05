@@ -8,6 +8,7 @@ s_id_lut = "/Volumes/lhab_raw/01_RAW/00_PRIVATE_sub_lists/new_sub_id_lut.tsv"
 
 in_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/04_ready2use/"
 out_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/05_ready2_use_newIDs/"
+report_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/99_report"
 
 data_out_dir = os.path.join(out_dir, "data")
 missing_out_dir = os.path.join(out_dir, "missing_info")
@@ -76,3 +77,23 @@ for d in domains:
 
     out_file = os.path.join(missing_out_dir, d + "_missing_info.tsv")
     missing_info.to_csv(out_file, index=None, sep="\t")
+
+
+# create a file with counts per testscore/session for checking
+
+def create_session_count_file(root_path, out_path):
+    if not os.path.isdir(out_path):
+        os.makedirs(out_path)
+
+    files = glob(os.path.join(root_path, "*_long.tsv"))
+    df = pd.DataFrame([])
+    for f in files:
+        df_ = pd.read_csv(f, sep="\t")
+        df = pd.concat((df, df_))
+
+    n_test_per_session = df.groupby(["test_name", "score_name", "session_id"])[["subject_id"]].count()
+    out_file = os.path.join(out_path, "n_test_per_session.xlsx")
+    n_test_per_session.to_excel(out_file)
+    print("Created report with session counts {}".format(out_file))
+
+create_session_count_file(os.path.join(out_dir, "data"), report_dir)
