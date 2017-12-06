@@ -96,4 +96,8 @@ def create_session_count_file(root_path, out_path):
     n_test_per_session.to_excel(out_file)
     print("Created report with session counts {}".format(out_file))
 
+    out_file = os.path.join(out_path, "lhab_all_cog_tests.tsv")
+    df.to_csv(out_file, index=False, sep="\t")
+    print("Created file with all tests {}".format(out_file))
+
 create_session_count_file(os.path.join(out_dir, "data"), report_dir)
