@@ -70,6 +70,20 @@ bids/freesurfer:v6.0.0-4 \
     -s cloudsessions/camcan.tracula.group2 -o /data.nfs/camcan/logfiles/camcan.tracula.group2  -w 60hours -C 15 -c 4 -v
 
 
+    image_id=40757134-9756-4054-9ec2-8eeaa1d8d677
+    instance_type=4cpu-16ram-hpc
+    screen bidswrapps_start.py \
+    bids/tracula:v6.0.0-4 \
+    /data.nfs/CAMCAN/bids_dwi_reduced /data.nfs/CAMCAN/output/tracula_v6.0.0-4_32dirs participant \
+    -ra "--license_key ~/fs.key --freesurfer_dir /data/freesurfer --n_cpus 4" \
+    --volume /data.nfs/CAMCAN/output/freesurfer_v6.0.0-4/:/data/freesurfer \
+    --image_id ${image_id} \
+    --instance_type ${instance_type} \
+    -s cloudsessions/camcan.tracula.participants.32dirs -o /data.nfs/camcan/logfiles/camcan.tracula.participants.32dirs -w 120hours -C 15 -c 4 -v -J 250
+
+
+## Tracula 32 dirs
+
 
 ## FS 5.3
 ```
@@ -118,4 +132,45 @@ fliem/baracus:0.1.5.dev.rc1 \
 --no-input-folder-ro \
 -s cloudsessions/camcan.baracus.group -o /data.nfs/camcan/logfiles/camcan.baracus.group -w 120hours -C 15 -c 1 -J 350 -v
 
+```
+
+# reduced dwi directions
+```
+image_id=40757134-9756-4054-9ec2-8eeaa1d8d677
+instance_type=4cpu-16ram-hpc
+screen bidswrapps_start.py \
+bids/tracula:v6.0.0-4 \
+/data.nfs/CAMCAN/bids_dwi_reduced /data.nfs/CAMCAN/output/tracula_v6.0.0-4_reduced participant \
+-ra "--license_key ~/fs.key --freesurfer_dir /data/freesurfer --n_cpus 4" \
+--volume /data.nfs/CAMCAN/output/freesurfer_v6.0.0-4/:/data/freesurfer \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+-s cloudsessions/camcan.tracula.participants.reduced -o /data.nfs/CAMCAN/logfiles/camcan.tracula.participants.reduced -w 120hours -C 15 -c 4 -v -J 250
+
+
+
+image_id=40757134-9756-4054-9ec2-8eeaa1d8d677
+instance_type=4cpu-16ram-hpc
+screen bidswrapps_start.py \
+bids/tracula:v6.0.0-4 \
+/data.nfs/CAMCAN/bids_dwi_reduced /data.nfs/CAMCAN/output/tracula_v6.0.0-4_reduced group1 \
+-ra "--license_key ~/fs.key --freesurfer_dir /data/freesurfer --n_cpus 4" \
+--volume /data.nfs/CAMCAN/output/freesurfer_v6.0.0-4/:/data/freesurfer \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+-pel CC620121 CC620619 CC610568 CC721704 CC720941 CC620121 CC720941 CC721704 CC620619 CC610568 \
+-s cloudsessions/camcan.tracula.group1.reduced -o /data.nfs/CAMCAN/logfiles/camcan.tracula.group1.reduced -w 120hours -C 15 -c 4 -v -J 250
+
+
+image_id=40757134-9756-4054-9ec2-8eeaa1d8d677
+instance_type=4cpu-16ram-hpc
+screen bidswrapps_start.py \
+bids/tracula:v6.0.0-4 \
+/data.nfs/CAMCAN/bids_dwi_reduced /data.nfs/CAMCAN/output/tracula_v6.0.0-4_reduced group2 \
+-ra "--license_key ~/fs.key --freesurfer_dir /data/freesurfer --n_cpus 4" \
+--volume /data.nfs/CAMCAN/output/freesurfer_v6.0.0-4/:/data/freesurfer \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+-pel CC620121 CC620619 CC610568 CC721704 CC720941 CC620121 CC720941 CC721704 CC620619 CC610568 \
+-s cloudsessions/camcan.tracula.group2.reduced -o /data.nfs/CAMCAN/logfiles/camcan.tracula.group2.reduced -w 120hours -C 15 -c 4 -v -J 250
 ```
