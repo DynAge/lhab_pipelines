@@ -48,7 +48,6 @@ def load_data_excel(orig_file, s_id_lut, tp_string_last=True):
         df_orig.dropna(subset=["vp_code"], inplace=True)
         df_orig.rename(columns={"vp_code": "private_subject_id"}, inplace=True)
 
-        # df_orig["private_subject_id"].replace({"vcp4 ": "vcp4"}, inplace=True)
         df_orig["private_subject_id"] = df_orig["private_subject_id"].str.strip()
         score_cols = df_orig.columns.drop(['private_subject_id']).tolist()
         if "tp_avail" in score_cols:
