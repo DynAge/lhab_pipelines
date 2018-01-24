@@ -1,109 +1,103 @@
-import os, pandas as pd
+import os, re
 from glob import glob
-from lhab_pipelines.nii_conversion.utils import get_public_sub_id
-import numpy as np
+import pandas as pd
 
-
-def long_to_wide(long, index, columns, values, nonumeric=False):
-    if nonumeric:
-        wide = long.pivot_table(index=index, columns=columns, values=values, aggfunc=lambda x: ', '.join(x.unique()))
-    else:
-        wide = long.pivot_table(index=index, columns=columns, values=values)
-    l = wide.columns.labels
-    le = wide.columns.levels
-    o = []
-    out_cols = []
-
-    for i, ii in enumerate(l):
-        o.append(le[i][l[i]])
-    o = np.array(o)
-
-    for i in o.T:
-        out_cols.append("_".join(i))
-    out_cols = [s.replace("value_", "") for s in out_cols]
-    out_cols = [s.replace("z_", "") + "_z" if s.startswith("z_") else s for s in out_cols]
-
-    wide.columns = out_cols
-    wide.reset_index(inplace=True)
-    return wide
-
-
-def export_behav_with_new_id(orig_file, s_id_lut):
-    df_orig = pd.read_excel(orig_file, na_values=["NA01", "NA02", "NA03", "NA04", "NA4", "NA1", "NA2", "TL", "X", 888,
-                                                  999])
-    # na_values seems not to catch numbers consistently
-    df_orig.replace({888: np.nan, 999: np.nan}, inplace=True)
-
-    # fixme remove na counts in last line
-    df_orig.dropna(subset=["vp_code"], inplace=True)
-    df_orig.rename(columns={"vp_code": "private_subject_id"}, inplace=True)
-    # df_orig["private_subject_id"].replace({"vcp4 ": "vcp4"}, inplace=True)
-    df_orig["private_subject_id"] = df_orig["private_subject_id"].str.strip()
-    score_cols = df_orig.columns.drop(['private_subject_id']).tolist()
-    if "tp_avail" in score_cols:
-        score_cols = score_cols.drop("tp_avail")
-
-    df_orig["subject_id"] = get_public_sub_id(["lhab_" + str(s) for s in df_orig["private_subject_id"]], s_id_lut)
-    if df_orig.subject_id.isnull().any():
-        df_orig.to_clipboard()
-        raise Exception("something went wrong with subject_id transformation")
-    df_orig.drop("private_subject_id", axis=1, inplace=True)
-
-    df_long = pd.melt(df_orig, id_vars=["subject_id"],
-                      value_vars=score_cols,
-                      var_name='test_session_id', value_name="value")  # score_names[0])
-    df_long["session_id"] = df_long["test_session_id"].apply(lambda s: s.split("_")[-1])
-    df_long["variable"] = df_long["test_session_id"].apply(lambda s: "_".join(s.split("_")[0:-1]))
-    df_long.drop("test_session_id", axis=1, inplace=True)
-    df_long.dropna(inplace=True)
-    df_wide = long_to_wide(df_long, ["subject_id", "session_id"], ["variable"], ["value"])
-    df_wide.rename(columns=lambda c: c.split("test_score_")[-1], inplace=True)
-
-    df_wide.sort_values(by=["subject_id", "session_id"], inplace=True)
-    df_long.sort_values(by=["subject_id", "session_id"], inplace=True)
-
-    df_long["conversion_date"] = pd.datetime.now().date().isoformat()
-    df_wide["conversion_date"] = pd.datetime.now().date().isoformat()
-    return df_long, df_wide
-
-
-
+from lhab_pipelines.behav.behav_utils import export_behav_with_new_id
 
 s_id_lut = "/Volumes/lhab_raw/01_RAW/00_PRIVATE_sub_lists/new_sub_id_lut.tsv"
 
 in_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/04_ready2use/"
 out_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/05_ready2_use_newIDs/"
+report_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/99_report"
 
+data_out_dir = os.path.join(out_dir, "data")
+missing_out_dir = os.path.join(out_dir, "missing_info")
 
-if not os.path.exists(out_dir):
-    os.makedirs(out_dir)
+for p in [out_dir, data_out_dir, missing_out_dir]:
+    if not os.path.exists(p):
+        os.makedirs(p)
 
 os.chdir(in_dir)
 
 domains = sorted(glob("*"))
+domains = [d for d in domains if os.path.isdir(d)]
 
 for d in domains:
-    df_long = pd.DataFrame([], columns=["subject_id", "session_id", "file"])
-    df_wide = pd.DataFrame([], columns=["subject_id", "session_id"])
+    df_long = pd.DataFrame([], columns=["subject_id", "session_id", "conversion_date", "file"])
+    df_wide = pd.DataFrame([], columns=["subject_id", "session_id", "conversion_date"])
+    missing_info = pd.DataFrame([], columns=["subject_id", "session_id", "conversion_date", "file"])
 
     os.chdir(os.path.join(in_dir, d))
-    xl_list = sorted(glob("*.xlsx"))
+    xl_list = sorted(glob("*_data.xlsx"))
     xl_list = [x for x in xl_list if "metadata" not in x]
 
     for orig_file in xl_list:
         print(orig_file)
-        df_long_, df_wide_ = export_behav_with_new_id(os.path.join(in_dir, d, orig_file), s_id_lut)
+        data_file = os.path.join(in_dir, d, orig_file)
+        p = re.compile(r"(lhab_)(\w*?)(_data)")
+        test_name = p.findall(os.path.basename(orig_file))[0][1]
+
+        metadata_str = "lhab_{}_metadata.xlsx".format(test_name) #"_".join(orig_file.split("_")[:2]) + "*" + " \
+                                                                                                   # ""_metadata.xlsx"
+        g = glob(metadata_str)
+        if len(g) > 1:
+            raise Exception("More than one meta data file found: {}".format(g))
+        elif len(g) == 0:
+            raise Exception("No meta data file found: {}".format(metadata_str))
+        else:
+            metadata_file = g[0]
+        data_file_path = os.path.join(in_dir, d, metadata_file)
+
+        df_long_, df_wide_, missing_info_ = export_behav_with_new_id(data_file,data_file_path, s_id_lut)
         df_long_["file"] = orig_file
+        missing_info_["file"] = metadata_file
 
         df_long = df_long.append(df_long_)
-        df_wide = df_wide.merge(df_wide_, how="outer", on=["subject_id", "session_id"])
+        df_wide = df_wide.merge(df_wide_, how="outer", on=["subject_id", "session_id", "conversion_date"])
+        missing_info = missing_info.append(missing_info_)
 
+    # sort columns
+    c = df_long.columns.drop(["subject_id", "session_id", "file", "conversion_date"]).tolist()
+    df_long = df_long[["subject_id", "session_id"] + c + ["file", "conversion_date"]]
+    c = df_wide.columns.drop(["subject_id", "session_id", "conversion_date"]).tolist()
+    df_wide = df_wide[["subject_id", "session_id"] + c + ["conversion_date"]]
+    c = missing_info.columns.drop(["subject_id", "session_id", "file", "conversion_date"]).tolist()
+    missing_info = missing_info[["subject_id", "session_id"] + c + ["file", "conversion_date"]]
 
-    c = df_long.columns.drop(["subject_id", "session_id", "file"]).tolist()
-    df_long = df_long[["subject_id", "session_id"] + c + ["file"]]
+    # sort rows
+    df_long.sort_values(["subject_id", "session_id"], inplace=True)
+    df_wide.sort_values(["subject_id", "session_id"], inplace=True)
+    missing_info.sort_values(["subject_id", "session_id"], inplace=True)
 
-    out_file = os.path.join(out_dir, d + "_long.tsv")
+    out_file = os.path.join(data_out_dir, d + "_long.tsv")
     df_long.to_csv(out_file, index=None, sep="\t")
 
-    out_file = os.path.join(out_dir, d + "_wide.tsv")
+    out_file = os.path.join(data_out_dir, d + "_wide.tsv")
     df_wide.to_csv(out_file, index=None, sep="\t")
+
+    out_file = os.path.join(missing_out_dir, d + "_missing_info.tsv")
+    missing_info.to_csv(out_file, index=None, sep="\t")
+
+
+# create a file with counts per testscore/session for checking
+
+def create_session_count_file(root_path, out_path):
+    if not os.path.isdir(out_path):
+        os.makedirs(out_path)
+
+    files = glob(os.path.join(root_path, "*_long.tsv"))
+    df = pd.DataFrame([])
+    for f in files:
+        df_ = pd.read_csv(f, sep="\t")
+        df = pd.concat((df, df_))
+
+    n_test_per_session = df.groupby(["test_name", "score_name", "session_id"])[["subject_id"]].count()
+    out_file = os.path.join(out_path, "n_test_per_session.xlsx")
+    n_test_per_session.to_excel(out_file)
+    print("Created report with session counts {}".format(out_file))
+
+    out_file = os.path.join(out_path, "lhab_all_cog_tests.tsv")
+    df.to_csv(out_file, index=False, sep="\t")
+    print("Created file with all tests {}".format(out_file))
+
+create_session_count_file(os.path.join(out_dir, "data"), report_dir)
