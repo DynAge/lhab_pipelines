@@ -202,3 +202,30 @@ fliem/baracus:0.1.4.dev \
 --no-input-folder-ro \
 -s cloudsessions/lhab.baracus.group -o /data.nfs/LHAB/logfiles/lhab.baracus.group -w 120hours -C 15 -c 1 -J 450 -v
 ```
+
+
+## extract_FA
+```
+dsv=v1.1.1
+image_id=5e159afe-41de-4724-8f47-244d45d6a014
+instance_type=8cpu-32ram-hpc #
+screen bidswrapps_start.py \
+fliem/extract_fa:v2.1 \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/extract_fa_v2 group \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+-ra "--n_cpus 4" \
+-s ~/cloudsessions/lhab.extract_fa_v2.group -o /data.nfs/LHAB/logfiles/lhab.extract_fa_v2.group -w 120hours -C 15 -c 4 -J 350 -v
+
+
+dsv=v1.1.1
+image_id=05b806d7-dc4d-47c9-979d-a5d6fbcc2f30
+instance_type=8cpu-32ram-hpc #
+screen bidswrapps_start.py \
+fliem/extract_fa:v2 \
+/data.nfs/LHAB/NIFTI/LHAB_${dsv}/sourcedata /data.nfs/LHAB/NIFTI/LHAB_${dsv}/derivates/extract_fa_v2 participant \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+-ra "--n_cpus 4" \
+-s ~/cloudsessions/lhab.extract_fa_v2.participants -o /data.nfs/LHAB/logfiles/lhab.extract_fa_v2.participants -w 120hours -C 15 -c 4 -J 350 -v
+```
