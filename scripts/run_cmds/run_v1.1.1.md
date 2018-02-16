@@ -205,7 +205,7 @@ fliem/baracus:0.1.4.dev \
 
 
 ## extract_FA
-```
+````
 dsv=v1.1.1
 image_id=5e159afe-41de-4724-8f47-244d45d6a014
 instance_type=8cpu-32ram-hpc #
@@ -228,4 +228,19 @@ fliem/extract_fa:v2 \
 --instance_type ${instance_type} \
 -ra "--n_cpus 4" \
 -s ~/cloudsessions/lhab.extract_fa_v2.participants -o /data.nfs/LHAB/logfiles/lhab.extract_fa_v2.participants -w 120hours -C 15 -c 4 -J 350 -v
+````
+
+
+## fmriprep
+```
+image_id=57f59d22-6b49-487b-9462-582e35d43709
+instance_type=8cpu-32ram-hpc
+screen bidswrapps_start.py \
+poldracklab/fmriprep:1.0.5 \
+/data.nfs/LHAB/NIFTI/LHAB_v1.1.1/sourcedata/ /data.nfs/LHAB/NIFTI/LHAB_v1.1.1/derivates/fmriprep_1.0.5 participant \
+-ra "--n_cpus 4 --mem_mb 16000 --ignore fieldmaps slicetiming --write-graph --longitudinal --fs-no-reconall --fs-license-file /opt/freesurfer/.license " \
+--volume /data.nfs/license.txt:/opt/freesurfer/.license \
+--image_id ${image_id} \
+--instance_type ${instance_type} \
+-s ~/cloudsessions/lhab.fmriprep.1.0.5 -o /data.nfs/LHAB/logfiles/lhab.fmriprep.1.0.5 -w 120hours -C 15 -c 4 -J 150
 ```

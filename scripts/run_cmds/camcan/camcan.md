@@ -174,3 +174,38 @@ bids/tracula:v6.0.0-4 \
 -pel CC620121 CC620619 CC610568 CC721704 CC720941 CC620121 CC720941 CC721704 CC620619 CC610568 \
 -s cloudsessions/camcan.tracula.group2.reduced -o /data.nfs/CAMCAN/logfiles/camcan.tracula.group2.reduced -w 120hours -C 15 -c 4 -v -J 250
 ```
+
+# extract_fa
+
+    image_id=5e159afe-41de-4724-8f47-244d45d6a014
+    instance_type=8cpu-32ram-hpc #
+    screen bidswrapps_start.py \
+    fliem/extract_fa:v2.1 \
+    /data.nfs/CAMCAN/bids /data.nfs/CAMCAN/output/extract_fa_v2 participant \
+    --image_id ${image_id} \
+    --instance_type ${instance_type} \
+    -ra "--n_cpus 2" \
+    -s ~/cloudsessions/camcan.extract_fa_v2.participant -o /data.nfs/CAMCAN/logfiles/camcan.extract_fa_v2.participant -w 120hours -C 15 -c 4 -J 350 -v
+
+    image_id=5e159afe-41de-4724-8f47-244d45d6a014
+    instance_type=16cpu-64ram-hpc #
+    screen bidswrapps_start.py \
+    fliem/extract_fa:v2.1 \
+    /data.nfs/CAMCAN/bids /data.nfs/CAMCAN/output/extract_fa_v2 participant \
+    --image_id ${image_id} \
+    --instance_type ${instance_type} \
+    -ra "--n_cpus 16" \
+    -pl CC110174 CC110606 CC310463 CC320575 CC520200 CC121158 \
+    -s ~/cloudsessions/camcan.extract_fa_v2.participant.redo1 -o /data.nfs/CAMCAN/logfiles/camcan.extract_fa_v2.participant.redo1 -w 120hours -C 15 -c 16 -J 350 -v
+
+
+
+    image_id=5e159afe-41de-4724-8f47-244d45d6a014
+    instance_type=8cpu-32ram-hpc #
+    screen bidswrapps_start.py \
+    fliem/extract_fa:v2.1 \
+    /data.nfs/CAMCAN/bids /data.nfs/CAMCAN/output/extract_fa_v2 group \
+    --image_id ${image_id} \
+    --instance_type ${instance_type} \
+    -ra "--n_cpus 2" \
+    -s ~/cloudsessions/camcan.extract_fa_v2.group -o /data.nfs/CAMCAN/logfiles/camcan.extract_fa_v2.group -w 120hours -C 15 -c 4 -J 350 -v
