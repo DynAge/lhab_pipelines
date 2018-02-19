@@ -177,35 +177,23 @@ bids/tracula:v6.0.0-4 \
 
 # extract_fa
 
-    image_id=5e159afe-41de-4724-8f47-244d45d6a014
+    image_id=9c7e1df4-a42f-48ef-99cb-7ea781348821
     instance_type=8cpu-32ram-hpc #
     screen bidswrapps_start.py \
-    fliem/extract_fa:v2.1 \
-    /data.nfs/CAMCAN/bids /data.nfs/CAMCAN/output/extract_fa_v2 participant \
+    fliem/extract_fa:v3 \
+    /data.nfs/CAMCAN/bids /data.nfs/CAMCAN/output/extract_fa_v3 participant \
     --image_id ${image_id} \
     --instance_type ${instance_type} \
     -ra "--n_cpus 2" \
-    -s ~/cloudsessions/camcan.extract_fa_v2.participant -o /data.nfs/CAMCAN/logfiles/camcan.extract_fa_v2.participant -w 120hours -C 15 -c 4 -J 350 -v
-
-    image_id=5e159afe-41de-4724-8f47-244d45d6a014
-    instance_type=16cpu-64ram-hpc #
-    screen bidswrapps_start.py \
-    fliem/extract_fa:v2.1 \
-    /data.nfs/CAMCAN/bids /data.nfs/CAMCAN/output/extract_fa_v2 participant \
-    --image_id ${image_id} \
-    --instance_type ${instance_type} \
-    -ra "--n_cpus 16" \
-    -pl CC110174 CC110606 CC310463 CC320575 CC520200 CC121158 \
-    -s ~/cloudsessions/camcan.extract_fa_v2.participant.redo1 -o /data.nfs/CAMCAN/logfiles/camcan.extract_fa_v2.participant.redo1 -w 120hours -C 15 -c 16 -J 350 -v
+    -s ~/cloudsessions/camcan.extract_fa_v3.participant -o /data.nfs/CAMCAN/logfiles/camcan.extract_fa_v3.participant -w 120hours -C 15 -c 4 -J 350 -v
 
 
-
-    image_id=5e159afe-41de-4724-8f47-244d45d6a014
+    image_id=9c7e1df4-a42f-48ef-99cb-7ea781348821
     instance_type=8cpu-32ram-hpc #
     screen bidswrapps_start.py \
-    fliem/extract_fa:v2.1 \
-    /data.nfs/CAMCAN/bids /data.nfs/CAMCAN/output/extract_fa_v2 group \
+    fliem/extract_fa:v3 \
+    /data.nfs/CAMCAN/bids /data.nfs/CAMCAN/output/extract_fa_v3 group \
     --image_id ${image_id} \
     --instance_type ${instance_type} \
     -ra "--n_cpus 2" \
-    -s ~/cloudsessions/camcan.extract_fa_v2.group -o /data.nfs/CAMCAN/logfiles/camcan.extract_fa_v2.group -w 120hours -C 15 -c 4 -J 350 -v
+    -s ~/cloudsessions/camcan.extract_fa_v3.group -o /data.nfs/CAMCAN/logfiles/camcan.extract_fa_v3.group -w 120hours -C 15 -c 4 -J 350 -v
