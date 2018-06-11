@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import re, os
+from glob import glob
 from lhab_pipelines.nii_conversion.utils import get_public_sub_id
 
 
@@ -153,7 +154,100 @@ def export_behav_with_new_id(orig_file, metadata_file, s_id_lut):
     df_long_clean["test_name"] = test_name
     missing_full_info["test_name"] = test_name
 
-    df_long_clean["conversion_date"] = pd.datetime.now().date().isoformat()
-    df_wide_clean["conversion_date"] = pd.datetime.now().date().isoformat()
     return df_long_clean, df_wide_clean, missing_full_info
 
+
+
+
+
+def export_domain(in_dir, out_dir, s_id_lut, domain):
+    data_out_dir = os.path.join(out_dir, "data")
+    os.makedirs(data_out_dir, exist_ok=True)
+    missing_out_dir = os.path.join(out_dir, "missing_info")
+    os.makedirs(missing_out_dir, exist_ok=True)
+
+    df_long = pd.DataFrame([], columns=["subject_id", "session_id", "conversion_date", "file"])
+    df_wide = pd.DataFrame([], columns=["subject_id", "session_id", "conversion_date"])
+    missing_info = pd.DataFrame([], columns=["subject_id", "session_id", "file"])
+
+    os.chdir(os.path.join(in_dir, domain))
+    xl_list = sorted(glob("*_data.xlsx"))
+    xl_list = [x for x in xl_list if "metadata" not in x]
+
+    for orig_file in xl_list:
+        print(orig_file)
+        data_file = os.path.join(in_dir, domain, orig_file)
+        p = re.compile(r"(lhab_)(\w*?)(_data)")
+        test_name = p.findall(os.path.basename(orig_file))[0][1]
+
+        metadata_str = "lhab_{}_metadata.xlsx".format(test_name)  # "_".join(orig_file.split("_")[:2]) + "*" + " \
+        # ""_metadata.xlsx"
+        g = glob(metadata_str)
+        if len(g) > 1:
+            raise Exception("More than one meta data file found: {}".format(g))
+        elif len(g) == 0:
+            raise Exception("No meta data file found: {}".format(metadata_str))
+        else:
+            metadata_file = g[0]
+        data_file_path = os.path.join(in_dir, domain, metadata_file)
+
+        df_long_, df_wide_, missing_info_ = export_behav_with_new_id(data_file, data_file_path, s_id_lut)
+        df_long_["file"] = orig_file
+        missing_info_["file"] = metadata_file
+
+        df_long = df_long.append(df_long_, sort=False)
+        df_wide = df_wide.merge(df_wide_, how="outer", on=["subject_id", "session_id"])
+        missing_info = missing_info.append(missing_info_, sort=False)
+
+
+    # sort rows
+    df_long.sort_values(["subject_id", "session_id"], inplace=True)
+    df_wide.sort_values(["subject_id", "session_id"], inplace=True)
+    missing_info.sort_values(["subject_id", "session_id"], inplace=True)
+
+    # add conversion date in first row
+    df_long["conversion_date"] = ""
+    df_long.loc[df_long.index[0], "conversion_date"] = pd.datetime.now().date().isoformat()
+
+    df_wide["conversion_date"] = ""
+    df_wide.loc[df_wide.index[0], "conversion_date"] = pd.datetime.now().date().isoformat()
+
+    # sort columns
+    c = df_long.columns.drop(["subject_id", "session_id", "file", "conversion_date"]).tolist()
+    df_long = df_long[["subject_id", "session_id"] + c + ["file", "conversion_date"]]
+    c = df_wide.columns.drop(["subject_id", "session_id", "conversion_date"]).tolist()
+    df_wide = df_wide[["subject_id", "session_id"] + c + ["conversion_date"]]
+    c = missing_info.columns.drop(["subject_id", "session_id", "file"]).tolist()
+    missing_info = missing_info[["subject_id", "session_id"] + c + ["file"]]
+
+    out_file = os.path.join(data_out_dir, domain + "_long.tsv")
+    df_long.to_csv(out_file, index=None, sep="\t")
+
+    out_file = os.path.join(data_out_dir, domain + "_wide.tsv")
+    df_wide.to_csv(out_file, index=None, sep="\t")
+
+    out_file = os.path.join(missing_out_dir, domain + "_missing_info.tsv")
+    missing_info.to_csv(out_file, index=None, sep="\t")
+
+
+def create_session_count_file(root_path, out_path, group):
+
+    files = glob(os.path.join(root_path, "*_long.tsv"))
+    if files:
+        os.makedirs(out_path, exist_ok=True)
+
+        df = pd.DataFrame([])
+        for f in files:
+            df_ = pd.read_csv(f, sep="\t")
+            df = pd.concat((df, df_))
+        df.sort_values(["subject_id", "session_id", "test_name", "score_name"], inplace=True)
+
+        n_test_per_session = df.groupby(["test_name", "score_name", "session_id"])[["subject_id"]].count()
+        out_file = os.path.join(out_path, "n_test_per_session.xlsx")
+        n_test_per_session.to_excel(out_file)
+        print("Created report with session counts {}".format(out_file))
+
+
+        out_file = os.path.join(out_path, "lhab_all_{}.tsv".format(group))
+        df.to_csv(out_file, index=False, sep="\t")
+        print("Created file with all tests {}".format(out_file))
