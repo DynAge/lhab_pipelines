@@ -6,8 +6,8 @@ from lhab_pipelines.behav.behav_utils import export_behav_with_new_id
 
 s_id_lut = "/Volumes/lhab_raw/01_RAW/00_PRIVATE_sub_lists/new_sub_id_lut.tsv"
 
-in_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/04_ready2use/"
-out_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/05_ready2_use_newIDs/"
+in_dir = "/Volumes/lhab_public/03_Data/99_Cleaning/01_Cognition/00_textfiles/04_ready2use/"
+out_dir = "/Volumes/lhab_public/03_Data/99_Cleaning/01_Cognition/00_textfiles/05_ready2_use_newIDs/"
 report_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/01_Cognition/textfiles/99_report"
 
 data_out_dir = os.path.join(out_dir, "data")

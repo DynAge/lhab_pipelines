@@ -54,6 +54,7 @@ def load_data_excel(orig_file, s_id_lut, tp_string_last=True):
             score_cols = score_cols.drop("tp_avail")
 
         df_orig["subject_id"] = get_public_sub_id(["lhab_" + str(s) for s in df_orig["private_subject_id"]], s_id_lut)
+
         if df_orig.subject_id.isnull().any():
             df_orig.to_clipboard()
             raise Exception("something went wrong with subject_id transformation")

@@ -5,17 +5,19 @@ import numpy as np
 
 if __name__ == "__main__":
     s_id_lut = "/Volumes/lhab_raw/01_RAW/00_PRIVATE_sub_lists/new_sub_id_lut.tsv"
-    in_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/04_Demographic"
-    out_dir = "/Volumes/lhab_public/03_Data/99_CleaningT1T2T3/04_Demographic/demographics_new_ids"
+    in_dir = "/Volumes/lhab_public/03_Data/99_Cleaning/02_Demographic/00_textfiles/ready2use/"
+    out_dir = "/Volumes/lhab_public/03_Data/99_Cleaning/02_Demographic/00_textfiles/ready2use_newIDs/"
 
     os.chdir(in_dir)
     files = sorted(glob("*.xlsx"))
 
     for f in files:
+        print(f)
         df = pd.read_excel(f)
-        df["ID"] = get_public_sub_id(["lhab_" + str(s) for s in df["ID"]], s_id_lut)
+        df["ID"] = get_public_sub_id(["lhab_" + str(s) for s in df["vp_code"]], s_id_lut)
         df.sort_values("ID", inplace=True)
 
+        df.drop(columns="vp_code", inplace=True)
         if f.startswith("Gender"):
             df.replace({"Gender": {1: "M", 2: "F"}}, inplace=True)
 
