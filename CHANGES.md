@@ -1,3 +1,6 @@
+* v1.1.13
+    * added tp6 quick conversion and input data check
+
 * v1.1.11
     * added euler calc
 
