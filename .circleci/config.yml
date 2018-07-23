@@ -32,10 +32,10 @@ jobs:
               fi
               docker images
         - run:
-          name: get version
-          command: |
-            git describe --tags --always > version
-            cat version
+            name: get version
+            command: |
+              git describe --tags --always > version
+              cat version
         - run:
             name: Build Docker image
             no_output_timeout: 60m
@@ -46,17 +46,17 @@ jobs:
               -t ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest .
               docker images
         - run:
-          name: Docker save
-          no_output_timeout: 40m
-          command: |
-            mkdir -p /tmp/cache
-            set +o pipefail
-            docker save ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest \
-              | pigz -2 -p 3 > /tmp/cache/docker.tar.gz
+            name: Docker save
+            no_output_timeout: 40m
+            command: |
+              mkdir -p /tmp/cache
+              set +o pipefail
+              docker save ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest \
+                | pigz -2 -p 3 > /tmp/cache/docker.tar.gz
         - save_cache:
-           key: docker-v1-{{ .Branch }}-{{ epoch }}
-           paths:
-            - /tmp/cache/docker.tar.gz
+             key: docker-v1-{{ .Branch }}-{{ epoch }}
+             paths:
+              - /tmp/cache/docker.tar.gz
         - persist_to_workspace:
             root: /tmp
             paths:
