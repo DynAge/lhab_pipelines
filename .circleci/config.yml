@@ -63,7 +63,10 @@ jobs:
               - cache/docker.tar.gz
 
 
-
+        - run:
+            name: tests... images
+            command: |
+              docker images
         - run:
             name: tests... print version
             command: |
@@ -82,8 +85,50 @@ jobs:
               docker run -ti --rm --read-only ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest python /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/run_nii_conversion_phantom.py /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW /data/out participant --ds_version phantomas
 
 
+
+  deploy:
+    machine:
+      image: circleci/classic:201711-01
+    working_directory: /home/circleci/deploy
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Install parallel gzip
+          command: sudo apt-get update && sudo apt-get install pigz
+      - run:
+          name: Load Docker image layer cache
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+            docker images
+      - run:
+          name: print version
+          command: |
+            docker run -ti --rm --read-only ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest --version
+      - run:
+          name: Deploy to Docker Hub
+          no_output_timeout: 40m
+          command: |
+            if [[ -n "$DOCKER_PASS" ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+              docker tag ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:$CIRCLE_TAG
+              docker push ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:$CIRCLE_TAG
+            fi
+
+
 workflows:
   version: 2
   build_test_deploy:
     jobs:
       - build_test
+      - deploy:
+          requires:
+            - build_test
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
