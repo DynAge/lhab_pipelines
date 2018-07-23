@@ -68,14 +68,6 @@ jobs:
             command: |
               docker images
         - run:
-            name: tests... print version
-            command: |
-              docker run -ti --rm --read-only ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest --version
-        - run:
-            name: tests... print help
-            command: |
-              docker run -ti --rm --read-only ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest -h
-        - run:
             name: tests... nosetests
             command: |
               docker run -ti --rm --read-only ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest nosetests -v /code/lhab_pipelines/
