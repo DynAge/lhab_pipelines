@@ -17,8 +17,8 @@ jobs:
               - docker-v1-
         - checkout
         - run:
-          name: Install parallel gzip
-          command: sudo apt-get update && sudo apt-get install pigz
+            name: Install parallel gzip
+            command: sudo apt-get update && sudo apt-get install pigz
         - run:
             name: Load Docker image layer cache
             no_output_timeout: 30m
