@@ -5,8 +5,7 @@ jobs:
         # Ubuntu 14.04 with Docker 17.10.0-ce
         image: circleci/classic:201711-01
       environment:
-        - TEST_DATA_NAME: "ds114_test2_freesurfer_precomp_v6.0.0"
-        - TEST_DATA_URL: "https://osf.io/yhzzj/?action=download&version=1"
+        - DATA_DIR: "/tmp/data"
       working_directory: /home/circleci/test
       steps:
         - restore_cache:
@@ -74,7 +73,10 @@ jobs:
         - run:
             name: tests... conversion test
             command: |
-              docker run -ti --rm --read-only -v /tmp:/tmp -v /var/tmp:/var/tmp ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest python /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/run_nii_conversion_phantom.py /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW /data/out participant --ds_version phantomas
+              mkdir -p ${DATA_DIR}
+              docker run -ti --rm --read-only -v ${DATA_DIR}:/data -v /tmp:/tmp -v /var/tmp:/var/tmp ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest python /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/run_nii_conversion_phantom.py /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW /data/out participant --ds_version phantomas
+        - store_artifacts:
+            path: ${DATA_DIR}
 
 
 
