@@ -1,0 +1,89 @@
+version: 2
+jobs:
+  build_test:
+      machine:
+        # Ubuntu 14.04 with Docker 17.10.0-ce
+        image: circleci/classic:201711-01
+      environment:
+        - TEST_DATA_NAME: "ds114_test2_freesurfer_precomp_v6.0.0"
+        - TEST_DATA_URL: "https://osf.io/yhzzj/?action=download&version=1"
+      working_directory: /home/circleci/test
+      steps:
+        - restore_cache:
+            keys:
+              - docker-v1-{{ .Branch }}-{{ epoch }}
+              - docker-v1-{{ .Branch }}-
+              - docker-v1-master-
+              - docker-v1-
+        - checkout
+        - run:
+          name: Install parallel gzip
+          command: sudo apt-get update && sudo apt-get install pigz
+        - run:
+            name: Load Docker image layer cache
+            no_output_timeout: 30m
+            command: |
+              docker info
+              set +o pipefail
+              if [ -f /tmp/cache/docker.tar.gz ]; then
+                pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+              else
+                echo "No docker cache found"
+              fi
+              docker images
+        - run:
+          name: get version
+          command: |
+            git describe --tags --always > version
+            cat version
+        - run:
+            name: Build Docker image
+            no_output_timeout: 60m
+            command: |
+              docker images
+              set +o pipefail
+              docker build --cache-from=${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} \
+              -t ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest .
+              docker images
+        - run:
+          name: Docker save
+          no_output_timeout: 40m
+          command: |
+            mkdir -p /tmp/cache
+            set +o pipefail
+            docker save ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest \
+              | pigz -2 -p 3 > /tmp/cache/docker.tar.gz
+        - save_cache:
+           key: docker-v1-{{ .Branch }}-{{ epoch }}
+           paths:
+            - /tmp/cache/docker.tar.gz
+        - persist_to_workspace:
+            root: /tmp
+            paths:
+              - cache/docker.tar.gz
+
+
+
+        - run:
+            name: tests... print version
+            command: |
+              docker run -ti --rm --read-only ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest --version
+        - run:
+            name: tests... print help
+            command: |
+              docker run -ti --rm --read-only ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest -h
+        - run:
+            name: tests... nosetests
+            command: |
+              docker run -ti --rm --read-only ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest nosetests -v /code/lhab_pipelines/
+        - run:
+            name: tests... conversion test
+            command: |
+              docker run -ti --rm --read-only ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest python /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/run_nii_conversion_phantom.py /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW /data/out participant --ds_version phantomas
+
+
+workflows:
+  version: 2
+  build_test_deploy:
+    jobs:
+      - build_test
