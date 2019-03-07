@@ -173,6 +173,7 @@ def export_domain(in_dir, out_dir, s_id_lut, domain):
     os.chdir(os.path.join(in_dir, domain))
     xl_list = sorted(glob("*_data.xlsx"))
     xl_list = [x for x in xl_list if "metadata" not in x]
+    xl_list = [x for x in xl_list if not x.startswith("~$")]
 
     for orig_file in xl_list:
         print(orig_file)
