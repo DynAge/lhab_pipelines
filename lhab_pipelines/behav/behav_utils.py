@@ -45,6 +45,9 @@ def load_data_excel(orig_file, s_id_lut, tp_string_last=True):
     # ensure that numerical-only subject ids are treated as strings
     df_orig = df_orig.astype({"vp_code": str})
 
+    # fixme 2hand has vp_codes starting with capital letters
+    df_orig["vp_code"] = df_orig["vp_code"].str.lower()
+
     if (df_orig.columns.tolist() == ['no missings']) & (df_orig.shape == (0, 1)):  # metadata file with no missings
         df_orig = None
         df_long = None
