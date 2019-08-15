@@ -30,14 +30,10 @@ for group in groups:
 
 
     for domain in domains:
-        # fixme
-        #from test import export_domain
         export_domain(group_in_dir, group_out_dir, s_id_lut, domain)
 
 
     if domains:
         # create a file with counts per testscore/session for checking
-        #fixme
-        #from test import create_session_count_file
         group_report_dir = os.path.join(group_out_dir, "report")
         create_session_count_file(os.path.join(group_out_dir, "data"), group_report_dir, group)
