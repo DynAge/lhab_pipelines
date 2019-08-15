@@ -42,6 +42,9 @@ def load_data_excel(orig_file, s_id_lut, tp_string_last=True):
     # na_values seems not to catch numbers consistently
     df_orig.replace({888: np.nan, 999: np.nan}, inplace=True)
 
+    # ensure that numerical-only subject ids are treated as strings
+    df_orig = df_orig.astype({"vp_code": str})
+
     if (df_orig.columns.tolist() == ['no missings']) & (df_orig.shape == (0, 1)):  # metadata file with no missings
         df_orig = None
         df_long = None
@@ -100,7 +103,7 @@ def prepare_missing_df(df_meta_long):
     #   - entire timepoint missing because not invited (tp4) and
     #   -dropout
     missing["info"] = np.nan
-    missing.replace({"score_value_details":{"missing tp": "missing_tp"}}, inplace=True)
+    missing.replace({"score_value_details": {"missing tp": "missing_tp"}}, inplace=True)
 
     missing.loc[missing.score_value_info == 1, "info"] = missing.score_value_details
     missing.loc[((missing.score_value_info == 1) & (missing.session_id == "tp4")), "info"] = "missing_tp_not_invited"
@@ -157,9 +160,6 @@ def export_behav_with_new_id(orig_file, metadata_file, s_id_lut):
     return df_long_clean, df_wide_clean, missing_full_info
 
 
-
-
-
 def export_domain(in_dir, out_dir, s_id_lut, domain):
     data_out_dir = os.path.join(out_dir, "data")
     os.makedirs(data_out_dir, exist_ok=True)
@@ -200,7 +200,6 @@ def export_domain(in_dir, out_dir, s_id_lut, domain):
         df_wide = df_wide.merge(df_wide_, how="outer", on=["subject_id", "session_id"])
         missing_info = missing_info.append(missing_info_, sort=False)
 
-
     # sort rows
     df_long.sort_values(["subject_id", "session_id"], inplace=True)
     df_wide.sort_values(["subject_id", "session_id"], inplace=True)
@@ -232,7 +231,6 @@ def export_domain(in_dir, out_dir, s_id_lut, domain):
 
 
 def create_session_count_file(root_path, out_path, group):
-
     files = glob(os.path.join(root_path, "*_long.tsv"))
     if files:
         os.makedirs(out_path, exist_ok=True)
@@ -247,7 +245,6 @@ def create_session_count_file(root_path, out_path, group):
         out_file = os.path.join(out_path, "n_test_per_session.xlsx")
         n_test_per_session.to_excel(out_file)
         print("Created report with session counts {}".format(out_file))
-
 
         out_file = os.path.join(out_path, "lhab_all_{}.tsv".format(group))
         df.to_csv(out_file, index=False, sep="\t")
