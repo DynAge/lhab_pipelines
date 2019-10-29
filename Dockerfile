@@ -1,35 +1,47 @@
-FROM fliem/lhab_pipelines_base:v1.0
+FROM neurodebian:bionic-non-free
 
-# tools that are in dev
+## FSL
+RUN apt-get update && \
+    apt-get install -y fsl-core=5.0.9-5~nd18.04+1
 
-RUN npm install -g bids-validator@0.19.8
-RUN echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IC9vcHQvZnJlZXN1cmZlci9saWNlbnNlLnR4dAo=" | base64 -d | sh
+# Configure environment
+ENV FSLDIR=/usr/share/fsl/5.0
+ENV FSLOUTPUTTYPE=NIFTI_GZ
+ENV PATH=/usr/lib/fsl/5.0:$PATH
+ENV FSLMULTIFILEQUIT=TRUE
+ENV POSSUMDIR=/usr/share/fsl/5.0
+ENV LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH
+ENV FSLTCLSH=/usr/bin/tclsh
+ENV FSLWISH=/usr/bin/wish
+ENV FSLOUTPUTTYPE=NIFTI_GZ
 
-#### DCM2NIIX
-WORKDIR /root
-RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y build-essential pkg-config libyaml-cpp-dev libyaml-cpp0.5 cmake libboost-dev git pigz unzip && \
-	  apt-get clean -y && apt-get autoclean -y && apt-get autoremove -y
+RUN apt-get update && \
+    apt-get install -y dcm2niix=1:1.0.20190902-1~nd18.04+1
 
-RUN cd /tmp && \
-    wget https://github.com/rordenlab/dcm2niix/archive/b6689d76821275824747743de92d93e2c322ff7c.zip -O dcm2niix.zip && \
-    unzip dcm2niix.zip && rm dcm2niix.zip && \
-  	cd dcm2niix-* && cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/ . && make install && \
-    cd /tmp && rm -rf /tmp/dcm2niix*
+RUN apt-get update && \
+    apt-get install -y curl wget && \
+    curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt-get remove -y curl && \
+    apt-get install -y nodejs
 
 
+RUN wget --quiet \
+      https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+      -O anaconda.sh && \
+    /bin/bash anaconda.sh -b -p /usr/local/anaconda && \
+    rm anaconda.sh
+ENV PATH=/usr/local/anaconda/bin:$PATH
 
-RUN pip install pybids
+RUN conda install pandas numpy
+RUN pip install nibabel pybids
+RUN conda install --channel conda-forge nipype
 
-RUN cd /tmp && \
-    wget https://github.com/poldracklab/pydeface/archive/d9a9e09cfafa6f080edbe72c5930aa7778544fa3.zip -O pydeface.zip && \
-    unzip pydeface.zip && rm pydeface.zip && \
-    cd pydeface-* && python setup.py install && cd /tmp && rm -rf /tmp/pydeface*
+RUN conda install git
+RUN pip install git+https://github.com/poldracklab/pydeface.git@v1.1.0
 
 
 COPY lhab_pipelines /code/lhab_pipelines/lhab_pipelines
 COPY scripts /code/lhab_pipelines/scripts
 COPY version /code/lhab_pipelines/version
 ENV PYTHONPATH=/code/lhab_pipelines:$PYTHONPATH
-
 CMD ["/bin/bash"]
