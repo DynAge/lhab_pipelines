@@ -5,7 +5,7 @@ import pandas as pd
 from lhab_pipelines.nii_conversion.utils import get_public_sub_id, get_private_sub_id, get_clean_subject_id, \
     get_clean_ses_id, fetch_demos
 from lhab_pipelines.utils import read_protected_file, to_tsv, read_tsv
-from bids.grabbids import BIDSLayout
+from bids import BIDSLayout
 from collections import OrderedDict
 
 
