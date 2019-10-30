@@ -39,6 +39,7 @@ RUN conda install --channel conda-forge nipype
 RUN conda install git
 RUN pip install git+https://github.com/poldracklab/pydeface.git@v1.1.0
 
+RUN conda install pytest
 
 COPY lhab_pipelines /code/lhab_pipelines/lhab_pipelines
 COPY scripts /code/lhab_pipelines/scripts
