@@ -28,7 +28,7 @@ def get_public_sub_id(old_sub_id, lut_file):
     if isinstance(old_sub_id, str):
         return df.loc[old_sub_id].values[0]
     else:
-        out_list = df.loc[old_sub_id, "new_id"].tolist() #df.loc[old_sub_id].ix[:, 0].tolist()
+        out_list = df.loc[old_sub_id, "new_id"].tolist()
         assert len(out_list) == len(old_sub_id), "In and out list not the same length %s, %s" % (out_list, old_sub_id)
         return out_list
 
@@ -42,7 +42,7 @@ def get_private_sub_id(new_sub_id, lut_file):
     if isinstance(new_sub_id, str):
         return df.loc[new_sub_id].values[0]
     else:
-        out_list = df.loc[new_sub_id].ix[:, 0].tolist()
+        out_list = df.loc[new_sub_id].iloc[:, 0].tolist()
         assert len(out_list) == len(new_sub_id), "In and out list not the same length %s, %s" % (out_list, new_sub_id)
         return out_list
 
