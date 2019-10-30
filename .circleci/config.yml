@@ -67,9 +67,9 @@ jobs:
             command: |
               docker images
         - run:
-            name: tests... nosetests
+            name: tests... pytest
             command: |
-              docker run -ti --rm --read-only -v /tmp:/tmp -v /var/tmp:/var/tmp ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest nosetests -v /code/lhab_pipelines/
+              docker run -ti --rm --read-only -v /tmp:/tmp -v /var/tmp:/var/tmp ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest pytest -v /code/lhab_pipelines/
         - run:
             name: tests... conversion test
             command: |
