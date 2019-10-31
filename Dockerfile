@@ -16,7 +16,7 @@ ENV FSLWISH=/usr/bin/wish
 ENV FSLOUTPUTTYPE=NIFTI_GZ
 
 RUN apt-get update && \
-    apt-get install -y dcm2niix=1:1.0.20190902-1~nd18.04+1
+    apt-get install -y pigz dcm2niix=1:1.0.20190902-1~nd18.04+1
 
 RUN apt-get update && \
     apt-get install -y curl wget && \
@@ -26,18 +26,18 @@ RUN apt-get update && \
 
 
 RUN wget --quiet \
-      https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+      https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh \
       -O anaconda.sh && \
     /bin/bash anaconda.sh -b -p /usr/local/anaconda && \
     rm anaconda.sh
 ENV PATH=/usr/local/anaconda/bin:$PATH
 
-RUN conda install pandas numpy
-RUN pip install nibabel pybids
-RUN conda install --channel conda-forge nipype
+RUN conda install pandas==0.25.1 numpy==1.16.4
+RUN pip install nibabel==2.4.1 pybids==0.9.4
+RUN conda install --channel conda-forge nipype==1.2.3
 
 RUN conda install git
-RUN pip install git+https://github.com/poldracklab/pydeface.git@v1.1.0
+RUN pip install https://github.com/poldracklab/pydeface/archive/v1.1.0.zip
 
 RUN conda install pytest
 
