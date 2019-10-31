@@ -110,13 +110,14 @@ if __name__ == "__main__":
         {"bids_name": "dwi", "bids_modality": "dwi", "search_str": "_dti_T", "only_use_last": True, "acq": "ap",
          "add_info": {**general_info, **sense_info, "PhaseEncodingDirection": "j-"}},
 
-        # func
-        {"bids_name": "bold", "bids_modality": "func", "search_str": "_fmri_T", "task": "rest", "physio": True,
-         "add_info": {**general_info, **sense_info, **rs_info, "PhaseEncodingDirection": "j-"}},
+        #fixme exclude bc dcm2niix does not play well with raw data
+        # # func
+        # {"bids_name": "bold", "bids_modality": "func", "search_str": "_fmri_T", "task": "rest", "physio": True,
+        #  "add_info": {**general_info, **sense_info, **rs_info, "PhaseEncodingDirection": "j-"}},
 
         # fieldmaps
-        {"bids_name": "bold", "bids_modality": "fmap", "search_str": "_fmri_pa_T", "acq": "pa",
-         "add_info": {**general_info, **sense_info, **rs_info, "PhaseEncodingDirection": "j"}},
+        # {"bids_name": "bold", "bids_modality": "fmap", "search_str": "_fmri_pa_T", "acq": "pa",
+        #  "add_info": {**general_info, **sense_info, **rs_info, "PhaseEncodingDirection": "j"}},
         {"bids_name": "dwi", "bids_modality": "fmap", "search_str": "_dti_pa_T", "acq": "pa",
          "add_info": {**general_info, **sense_info, "PhaseEncodingDirection": "j"}},
         {"bids_name": "dwi", "bids_modality": "fmap", "search_str": "_dti_ap_T", "acq": "ap",
@@ -183,8 +184,8 @@ if __name__ == "__main__":
                       oj(output_dir, "sub-lhabX9999/ses-tp3/anat/sub-lhabX9999_ses-tp3_run-1_T1w.json"),
                       oj(output_dir, "sub-lhabX9999/ses-tp1/anat/sub-lhabX9999_ses-tp1_acq-2D_run-1_FLAIR.nii.gz"),
                       oj(output_dir, "sub-lhabX9999/ses-tp1/anat/sub-lhabX9999_ses-tp1_acq-3D_run-1_FLAIR.nii.gz"),
-                      oj(output_dir, "sub-lhabX9999/ses-tp3/func/sub-lhabX9999_ses-tp3_task-rest_run-1_bold.nii.gz"),
-                      oj(output_dir, "sub-lhabX9999/ses-tp3/fmap/sub-lhabX9999_ses-tp3_acq-pa_run-1_bold.nii.gz"),
+                      # oj(output_dir, "sub-lhabX9999/ses-tp3/func/sub-lhabX9999_ses-tp3_task-rest_run-1_bold.nii.gz"),
+                      # oj(output_dir, "sub-lhabX9999/ses-tp3/fmap/sub-lhabX9999_ses-tp3_acq-pa_run-1_bold.nii.gz"),
                       oj(output_dir, "sub-lhabX9999/ses-tp1/dwi/sub-lhabX9999_ses-tp1_acq-ap_run-1_dwi.nii.gz"),
                       oj(output_dir, "sub-lhabX9999/ses-tp1/dwi/sub-lhabX9999_ses-tp1_acq-ap_run-1_dwi.nii.gz"),
                       oj(output_dir, "sub-lhabX9999/ses-tp1/dwi/sub-lhabX9999_ses-tp1_acq-ap_run-1_dwi.nii.gz"),
