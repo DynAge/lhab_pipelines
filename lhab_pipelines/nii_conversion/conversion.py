@@ -3,7 +3,7 @@ import os
 from glob import glob
 import numpy as np
 
-from nipype.interfaces.dcm2nii import Dcm2niix
+from .interface import Dcm2niix_par
 from nipype.interfaces.fsl import Reorient2Std
 
 import lhab_pipelines
@@ -161,7 +161,7 @@ def run_dcm2niix(bids_name, bids_modality, bvecs_from_scanner_file, mapping_file
     assert os.path.exists(abs_rec_file), "REC file does not exist %s" % abs_rec_file
 
     # run converter
-    converter = Dcm2niix()
+    converter = Dcm2niix_par()
     converter.inputs.source_names = [abs_par_file]
     converter.inputs.bids_format = True
     converter.inputs.compress = 'i'
@@ -171,7 +171,9 @@ def run_dcm2niix(bids_name, bids_modality, bvecs_from_scanner_file, mapping_file
     print("XXXXXXX running dcm2niix command")
     print(converter.cmdline)
     converter_results = converter.run()
-    bids_file = converter_results.outputs.bids
+    bids_file = list(filter(lambda s: s.endswith(".json"), converter_results.outputs.bids))
+    assert len(bids_file) == 1, bids_file
+    bids_file = bids_file[0]
 
     # add additional information to json
     ## scan duration
