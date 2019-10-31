@@ -71,7 +71,7 @@ jobs:
             command: |
               docker run -ti --rm --read-only -v /tmp:/tmp -v /var/tmp:/var/tmp ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest pytest -v /code/lhab_pipelines/
         - run:
-            name: tests... conversion test
+            name: tests... conversion test w toy phantom data
             command: |
               mkdir -p ${DATA_DIR}
               docker run -ti --rm -v ${DATA_DIR}:/data -v /tmp:/tmp -v /var/tmp:/var/tmp ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest python /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/run_nii_conversion_phantom.py /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW /data/out participant --ds_version phantomas
