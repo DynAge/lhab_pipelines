@@ -34,8 +34,8 @@ output_dir = os.path.join(base_dir, "01_RAW")
 data_dir = os.path.join(base_dir, "data")
 
 os.chdir(output_dir)
-print(os.path.relpath(os.path.join(data_dir, "00_bvecs")), "00_bvecs")
 os.symlink(os.path.relpath(os.path.join(data_dir, "00_bvecs")), "00_bvecs")
+print(os.path.relpath(os.path.join(data_dir, "00_bvecs")), "00_bvecs")
 
 
 print(mapping)

@@ -31,6 +31,7 @@ if __name__ == "__main__":
                                                 '\n original: output_dir')
     parser.add_argument('analysis_level', help='Level of the analysis that will be performed. ',
                         choices=['participant'])
+    parser.add_argument('--info_out_dir', help='The directory where the misc info files are written to', required=True)
     parser.add_argument('--participant_label', help='The label of the participant that should be analyzed.'
                                                     'For the conversion wf this should be given as lhab_1234',
                         nargs="+")
@@ -143,6 +144,7 @@ if __name__ == "__main__":
                               in_ses_folder,
                               output_dir,
                               info_list,
+                              args.info_out_dir,
                               bvecs_from_scanner_file=bvecs_from_scanner_file,
                               public_output=public_output,
                               use_new_ids=use_new_ids,

@@ -19,16 +19,16 @@ def get_clean_ses_id(old_ses_id):
     return "tp" + old_ses_id[1:]
 
 
-def get_public_sub_id(old_sub_id, lut_file):
+def get_public_sub_id(old_sub_id, lut_file, from_col="old_id", to_col="new_id"):
     """returns public sub_id of style lhabX0001
     if old_subj_id is string: returns string
     if old_subj_id is list: returns list """
     df = pd.read_csv(lut_file, sep="\t")
-    df = df.set_index("old_id")
+    df = df.set_index(from_col)
     if isinstance(old_sub_id, str):
         return df.loc[old_sub_id].values[0]
     else:
-        out_list = df.loc[old_sub_id, "new_id"].tolist()
+        out_list = df.loc[old_sub_id, to_col].tolist()
         assert len(out_list) == len(old_sub_id), "In and out list not the same length %s, %s" % (out_list, old_sub_id)
         return out_list
 
@@ -95,6 +95,14 @@ def update_sub_scans_file(output_dir, bids_sub, bids_ses, bids_modality, out_fil
         scans = scans[["participant_id", "session_id", "filename"]]
     to_tsv(scans, scans_file)
 
+
+def get_image_acq(par_files):
+    df = pd.DataFrame()
+    for par in par_files:
+        general_info, image_defs = read_par(par)
+        acq_time = parse_acq_time(general_info)
+        df = df.append(pd.DataFrame({"file": [par], "acq_time": [acq_time]}))
+    return df
 
 # PAR IO
 def read_par(par_file):
@@ -233,7 +241,6 @@ def rotate_vectors(directions, ap, fh, rl, orient):
     #
     #  BEWARE : Angulations are iverted versions of par file angulations
     #           the angulations are expected to be in degrees
-
 
     pi, sin, cos = np.pi, np.sin, np.cos
     ap = ap * pi / 180.

@@ -42,6 +42,7 @@ RUN pip install https://github.com/poldracklab/pydeface/archive/v1.1.0.zip
 RUN conda install pytest
 
 RUN npm install -g bids-validator@1.3.8
+
 COPY lhab_pipelines /code/lhab_pipelines/lhab_pipelines
 COPY scripts /code/lhab_pipelines/scripts
 COPY version /code/lhab_pipelines/version

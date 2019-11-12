@@ -25,26 +25,22 @@ def get_subject_duration(subject):
     return duration
 
 
-def calc_session_duration(output_dir, public_output, use_new_ids):
+def calc_session_duration(bids_dir, info_out_dir):
     """
     looks for subjects in output_dir and checks session durations
     raises Exception if duration is longer 2h
     """
-    # privacy settings
-    if public_output and use_new_ids:
-        raise Exception("cannot calc session duration from non private data.")
-
-    os.chdir(output_dir)
+    os.chdir(bids_dir)
     subjects_list = sorted(glob("sub*"))
     if not subjects_list:
-        raise Exception("No subjects found in %s" % output_dir)
+        raise Exception("No subjects found in %s" % bids_dir)
 
     df = pd.DataFrame([])
     for subject in subjects_list:
         subject_duration = get_subject_duration(subject)
         df = df.append(subject_duration)
 
-    out_file = os.path.join(output_dir, "session_duration.tsv")
+    out_file = os.path.join(info_out_dir, "session_duration.tsv")
     print(out_file)
     df.to_csv(out_file, sep="\t")
 
@@ -52,16 +48,8 @@ def calc_session_duration(output_dir, public_output, use_new_ids):
         raise Exception("something with the data is probably off. max duration of %s" % df["duration_minutes"].max())
 
 
-def calc_demos(output_dir,
-               ses_id_list,
-               raw_dir,
-               in_ses_folder,
-               demo_file,
-               pwd,
-               use_new_ids=True,
-               new_id_lut_file=None,
-               public_output=True,
-               ):
+def calc_demos(output_dir, info_out_dir, ses_id_list, raw_dir, demo_file, pwd, use_new_ids=True,
+               new_id_lut_file=None, tp6_raw_lut=None):
     '''
     Calcluates demos from acq_time
     '''
@@ -76,11 +64,18 @@ def calc_demos(output_dir,
 
     for new_subject_id in new_sub_id_list:
         old_subject_id = get_private_sub_id(new_subject_id, new_id_lut_file)
+        if tp6_raw_lut:
+            tp6_raw_id = get_public_sub_id(old_subject_id, tp6_raw_lut, from_col="old_id", to_col="tp6_id")
 
         for old_ses_id in ses_id_list:
-            subject_ses_folder = os.path.join(raw_dir, old_ses_id, in_ses_folder)
-            os.chdir(subject_ses_folder)
-            subject_folder = sorted(glob(old_subject_id + "*"))
+            session_folder = os.path.join(raw_dir, old_ses_id, "01_noIF")
+            os.chdir(session_folder)
+
+            if old_ses_id == "T6":
+                folder_subject_id = tp6_raw_id
+            else:
+                folder_subject_id = old_subject_id
+            subject_folder = sorted(glob(folder_subject_id + "*"))
             assert len(subject_folder) < 2, "more than one subject folder %s" % old_subject_id
 
             if subject_folder:
@@ -104,8 +99,7 @@ def calc_demos(output_dir,
                     out_acq_time_df = pd.concat((out_acq_time_df, df_acq_time_subject))
 
     to_tsv(out_demo_df, os.path.join(output_dir, "participants.tsv"))
-    if not public_output:
-        to_tsv(out_acq_time_df, os.path.join(output_dir, "acq_time.tsv"))
+    to_tsv(out_acq_time_df, os.path.join(info_out_dir, "acq_time.tsv"))
 
     print("\n\n\n\nDONE.\nExported demos for %d subjects." % len(new_sub_id_list))
     print(new_sub_id_list)
@@ -144,8 +138,8 @@ def get_scan_duration(output_dir, modality="func", task="rest"):
     to_tsv(scan_duration, output_file)
 
 
-def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_folder, info_list, new_id_lut_file,
-                    excluded_dir=None):
+def compare_par_nii(output_dir, old_sub_id_list, use_new_ids, raw_dir, ses_id_list, info_list, new_id_lut_file,
+                    excluded_dir=None, tp6_raw_lut=None):
     """
     - Checks that all subjects from subject list are in sourcedata
     - Checks that par and nii filecount agrees
@@ -156,30 +150,34 @@ def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_fo
     layout = BIDSLayout(output_dir)
     subjects_list = layout.get_subjects()
 
-    for old_sub_id in old_sub_id_list:
-        new_sub_id = get_public_sub_id(old_sub_id, new_id_lut_file)
-        sub_dir = os.path.join(output_dir, "sub-" + new_sub_id)
-        f = sorted(glob(sub_dir))
-        if not f:
-            raise Exception("No folder not found: %s" % sub_dir)
-    print("%d subjects from list found in folder %s. Seems OK...\n" % (len(old_sub_id_list), output_dir))
-
     # compare filecount of par and nii files and export
     filecount = pd.DataFrame([])
     for new_sub_id in subjects_list:
-        old_sub_id = get_private_sub_id(new_sub_id, new_id_lut_file)
 
         for old_ses_id in ses_id_list:
+            if old_ses_id == "T6":
+                tp6_raw_id = get_public_sub_id(old_sub_id, tp6_raw_lut, from_col="old_id", to_col="tp6_id")
+                old_sub_id = tp6_raw_id
+            else:
+                if use_new_ids:
+                    old_sub_id = get_private_sub_id(new_sub_id, new_id_lut_file)
+                else:
+                    old_sub_id = new_sub_id
+
             new_ses_id = "tp" + old_ses_id[-1]
-            sub_ses_par_dir = os.path.join(raw_dir, old_ses_id, in_ses_folder,
-                                           old_sub_id + "_t%s_raw" % new_ses_id[-1])
+            sess_suffix = "" if new_ses_id == "tp6" else f"_t{new_ses_id[-1]}_raw"
+            sub_ses_par_dir = os.path.join(raw_dir, old_ses_id, "01_noIF", old_sub_id + sess_suffix)
             sub_ses_nii_dir = os.path.join(output_dir, "sub-" + new_sub_id, "ses-" + new_ses_id)
 
             n_files = OrderedDict([("subject_id", new_sub_id), ("session_id", new_ses_id)])
 
             for info in info_list:
-                par_search_str = os.path.join(sub_ses_par_dir, "*" + info["search_str"] + "*.par")
-                par_f = sorted(glob(par_search_str))
+                par_f  = []
+                search_strings = info["search_str"]
+                search_strings = [search_strings] if isinstance(search_strings, str) else search_strings
+                for sstring in search_strings:
+                    par_search_str = os.path.join(sub_ses_par_dir, "*" + sstring + "*.par")
+                    par_f.extend(sorted(glob(par_search_str)))
                 n_files_par = len(par_f)
 
                 if "acq" in info.keys():
@@ -218,8 +216,10 @@ def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_fo
                                                                                               nii_search_str))
                 # TODO check physio
                 if "physio" in info.keys() and info["physio"]:
-                    phys_par_search_str = os.path.join(sub_ses_par_dir, "*" + info["search_str"] + "*_physio.log")
-                    phys_par_f = sorted(glob(phys_par_search_str))
+                    phys_par_f = []
+                    for sstring in search_strings:
+                        phys_par_search_str = os.path.join(sub_ses_par_dir, "*" + sstring + "*_physio.log")
+                        phys_par_f.extend(sorted(glob(phys_par_search_str)))
                     phys_n_files_par = len(phys_par_f)
 
                     phys_nii_search_str = os.path.join(sub_ses_nii_dir, info["bids_modality"], "*" + acq_str + "*" +
@@ -253,7 +253,7 @@ def compare_par_nii(output_dir, old_sub_id_list, raw_dir, ses_id_list, in_ses_fo
     to_tsv(filecount, output_file)
     print("Compared filecount from par and nifti files. Seems OK...")
     print("Filecount written to %s" % output_file)
-
+    return layout
 
 def reduce_sub_files(bids_dir, output_file, sub_file):
     df = pd.DataFrame([])
