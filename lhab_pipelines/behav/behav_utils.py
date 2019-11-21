@@ -7,8 +7,9 @@ from lhab_pipelines.nii_conversion.utils import get_public_sub_id
 
 def long_to_wide(long, index, columns, values, nonumeric=False):
     if nonumeric:
-        wide = long.pivot_table(index=index, columns=columns, values=values, aggfunc="first")  # aggfunc=lambda x: ',
-        # '.join(x.unique()))
+        dd = long[index + columns]
+        assert not dd.duplicated().any()
+        wide = long.pivot_table(index=index, columns=columns, values=values, aggfunc="first")
     else:
         wide = long.pivot_table(index=index, columns=columns, values=values)
     l = wide.columns.labels
@@ -151,7 +152,13 @@ def export_behav_with_new_id(orig_file, metadata_file, s_id_lut):
         missing_full_info = pd.DataFrame([])
         df_long_clean = df_long
 
-    df_wide_clean = long_to_wide(df_long_clean, ["subject_id", "session_id"], ["score_name"], ["score_value"])
+    if "lhab_mothertongue_data.xlsx" in orig_file:
+        nonumeric = True
+    else:
+        nonumeric = False
+
+    df_wide_clean = long_to_wide(df_long_clean, ["subject_id", "session_id"], ["score_name"], ["score_value"],
+                                 nonumeric=nonumeric)
     df_wide_clean.rename(columns=lambda c: c.split("test_score_")[-1], inplace=True)
 
     df_wide_clean.sort_values(by=["subject_id", "session_id"], inplace=True)
