@@ -93,7 +93,8 @@ def prepare_missing_df(df_meta_long):
         5: "environmental_circumstance",
         6: "test_supervisor_error",
         7: "unknown_reasons",
-        8: "Time reasons"
+        8: "Time reasons",
+        99: "Unknown Reasons"
     }
 
     missing_info = df_meta_long[df_meta_long.score_name == "missing"]
