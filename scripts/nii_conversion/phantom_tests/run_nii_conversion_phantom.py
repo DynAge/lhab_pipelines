@@ -71,12 +71,23 @@ if __name__ == "__main__":
 
     do_deface = True if args.public_output else False
 
+
+    def filter_not_3d_flair(s):
+        if "_3d_" in s:
+            return False
+        else:
+            return True
+
+
     info_list = [
         # anatomical
         {"bids_name": "T1w", "bids_modality": "anat", "search_str": "t1w_", "deface": do_deface,
          "add_info": {**general_info}},
+
         # flair
-        {"bids_name": "FLAIR", "bids_modality": "anat", "search_str": ["2dflair_", "flair_longtr"], "acq": "2D",
+        {"bids_name": "FLAIR", "bids_modality": "anat", "search_str": ["2dflair_", "flair_longtr", "_flair_"],
+         "post_glob_filter": filter_not_3d_flair,
+         "acq": "2D",
          "deface": do_deface,
          "add_info": {**general_info}},
         {"bids_name": "FLAIR", "bids_modality": "anat", "search_str": "3d*flair_", "acq": "3D", "deface": do_deface,
@@ -100,8 +111,6 @@ if __name__ == "__main__":
          "add_info": {**general_info, **sense_info, "PhaseEncodingDirection": "j-"}}
     ]
 
-
-
     dataset_description = {"Name": "LHAB longitudinal healthy aging brain study",
                            "BIDSVersion": "1.0.0",
                            "License": "XXXXXX what license is this dataset distributed under? The use of license name "
@@ -120,7 +129,7 @@ if __name__ == "__main__":
     if args.participant_label:
         old_sub_id_list = [s.strip() for s in args.participant_label]
     else:
-        old_sub_id_list = read_tsv(args.subject_list_file)["sub_id"].tolist()
+        old_sub_id_list = read_tsv(args.subject_list_file, no_header=True)[0].tolist()
 
     run_conversion(args.raw_dir, args.output_base_dir, args.analysis_level, args.info_out_dir, old_sub_id_list,
                    args.session_label, args.public_output, args.use_new_ids, args.ds_version, info_list,
