@@ -31,6 +31,8 @@ def submit_single_subject(old_subject_id, ses_id_list, raw_dir, output_dir, info
     """
     unconverted_out_dir = info_out_dir / "unconverted_files"
     unconverted_out_dir.mkdir(parents=True, exist_ok=True)
+    # fixme
+    print(old_subject_id, ses_id_list)
 
     if public_output:
         assert use_new_ids, "Public output requested, but retaining old subject ids; Doesn't sound good."
@@ -53,13 +55,13 @@ def submit_single_subject(old_subject_id, ses_id_list, raw_dir, output_dir, info
         subject_folder = sorted(glob(folder_subject_id + "*"))
         assert len(subject_folder) < 2, "more than one subject folder %s" % old_subject_id
 
+        converted_par_files, converted_physio_files, mapping = [], [], []
         if subject_folder:
             some_data_found = True
             subject_folder = subject_folder[0]
             abs_subject_folder = os.path.abspath(subject_folder)
             os.chdir(abs_subject_folder)
 
-            converted_par_files, converted_physio_files, mapping = [], [], []
             for infodict in info_list:
                 converted_par_files_, converted_physio_files_, mapping_ = \
                     convert_modality(old_subject_id,
@@ -75,23 +77,24 @@ def submit_single_subject(old_subject_id, ses_id_list, raw_dir, output_dir, info
                 converted_physio_files.extend(converted_physio_files_)
                 mapping.extend(mapping_)
 
-        subject = public_sub_id if public_sub_id else old_subject_id
-        session = old_ses_id.replace("T", "tp")
-        df_unconverted = check_unconverted_files(converted_par_files, converted_physio_files, subject, session)
-        df_unconverted.to_csv(unconverted_out_dir / f"sub-{subject}_ses-{session}_unconverted.tsv", sep="\t",
-                              index=False)
+            subject = public_sub_id if public_sub_id else old_subject_id
+            session = old_ses_id.replace("T", "tp")
+            df_unconverted = check_unconverted_files(converted_par_files, converted_physio_files, subject, session)
+            df_unconverted.to_csv(unconverted_out_dir / f"sub-{subject}_ses-{session}_unconverted.tsv", sep="\t",
+                                  index=False)
 
-        mapping_dir = info_out_dir / "parrec_mapping_PRIVATE"
-        mapping_dir.mkdir(parents=True, exist_ok=True)
-        mapping_df = pd.DataFrame(mapping, columns=["from", "to"])
-        mapping_df.to_csv(mapping_dir / f"sub-{subject}_ses-{session}_par2nii_mapping.tsv", sep="\t", index=False)
+            mapping_dir = info_out_dir / "parrec_mapping_PRIVATE"
+            mapping_dir.mkdir(parents=True, exist_ok=True)
+            mapping_df = pd.DataFrame(mapping, columns=["from", "to"])
+            mapping_df.to_csv(mapping_dir / f"sub-{subject}_ses-{session}_par2nii_mapping.tsv", sep="\t", index=False)
 
-        acq_times = get_image_acq(converted_par_files)
-        duration_minutes = (acq_times["acq_time"].max() - acq_times["acq_time"].min()).total_seconds() / 60.
-        acq_times_dir = info_out_dir / "acq_time_PRIVATE"
-        acq_times_dir.mkdir(parents=True, exist_ok=True)
-        acq_times.to_csv(acq_times_dir / f"sub-{subject}_ses-{session}_acq_times.tsv", sep="\t", index=False)
-        assert duration_minutes < 120, f"Session too long. Check {subject} {session}"
+            if converted_par_files:
+                acq_times = get_image_acq(converted_par_files)
+                duration_minutes = (acq_times["acq_time"].max() - acq_times["acq_time"].min()).total_seconds() / 60.
+                acq_times_dir = info_out_dir / "acq_time_PRIVATE"
+                acq_times_dir.mkdir(parents=True, exist_ok=True)
+                acq_times.to_csv(acq_times_dir / f"sub-{subject}_ses-{session}_acq_times.tsv", sep="\t", index=False)
+                assert duration_minutes < 120, f"Session too long. Check {subject} {session}"
 
     if not some_data_found:
         raise FileNotFoundError("No data found for %s. Check again. Stopping..." % old_subject_id)
@@ -115,7 +118,8 @@ def check_unconverted_files(converted_par_files, converted_physio_files, subject
 def convert_modality(old_subject_id, old_ses_id, output_dir, info_out_dir, bids_name, bids_modality,
                      search_str, bvecs_from_scanner_file=None, public_sub_id=None, public_output=True,
                      reorient2std=True, task=None, direction=None, acq=None,
-                     only_use_last=False, deface=False, physio=False, add_info={}, dry_run=False):
+                     only_use_last=False, deface=False, physio=False, add_info={}, dry_run=False,
+                     post_glob_filter=None):
     """
     runs conversion for one subject and one modality
     public_output: if True: strips all info about original subject_id, file, date
@@ -137,6 +141,10 @@ def convert_modality(old_subject_id, old_ses_id, output_dir, info_out_dir, bids_
     par_file_list = []
     for s_str in search_str:
         par_file_list += sorted(glob("*" + s_str + "*.par"))
+
+    if post_glob_filter:
+        par_file_list = list(filter(post_glob_filter, par_file_list))
+
     physio_in_file_list = []
 
     mapping = []
