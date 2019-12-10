@@ -83,6 +83,8 @@ if __name__ == "__main__":
         # anatomical
         {"bids_name": "T1w", "bids_modality": "anat", "search_str": "t1w_", "deface": do_deface,
          "add_info": {**general_info}},
+        {"bids_name": "T2w", "bids_modality": "anat", "search_str": "t2w_", "deface": do_deface,
+         "add_info": {**general_info}},
 
         # flair
         {"bids_name": "FLAIR", "bids_modality": "anat", "search_str": ["2dflair_", "flair_longtr", "_flair_"],
