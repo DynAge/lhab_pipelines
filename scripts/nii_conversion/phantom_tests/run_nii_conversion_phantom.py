@@ -11,24 +11,18 @@ CI Test for LHAB conversion pipeline (par to nifti).
 """
 
 import os, argparse
+from pathlib import Path
+
 from lhab_pipelines.nii_conversion.conversion import run_conversion
 from lhab_pipelines.utils import read_tsv
-
-import numpy as np
-import json
-
-from os.path import join as oj
-from pathlib import Path
+from lhab_pipelines.nii_conversion.config import get_info_list_v2, dataset_description_v2
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='LHAB raw to nifti conversion. \nBIDS-Apps compatiple arguments.'
                                                  "\nexample:\n python run_nii_conversion.py /data/raw /data/ participant "
                                                  "--no-public_output --participant_label lhab_1c")
-    parser.add_argument('raw_dir', help='The directory with the RAW input dataset.'
-                                        '\n original: bids_dir')
-    parser.add_argument('output_base_dir', help='The directory where the output files '
-                                                'should be stored.'
-                                                '\n original: output_dir')
+    parser.add_argument('raw_dir', help='The directory with the RAW input dataset.')
+    parser.add_argument('output_base_dir', help='The directory where the output files should be stored.')
     parser.add_argument('analysis_level', help='Level of the analysis that will be performed. ',
                         choices=['participant', 'group'])
     parser.add_argument('--info_out_dir', help='The directory where the misc info files are written to', required=True)
@@ -55,77 +49,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    ## info
-    # LAS Orientation
-    # i : RL
-    # i-: LR
-    # j : PA
-    # j-: AP
-    # k : IS
-    # k-: SI
-    general_info = {"MagneticFieldStrength": 3.0, "ManufacturersModelName": "Philips Ingenia"}
-    sense_info = {"ParallelAcquisitionTechnique": "SENSE", "ParallelReductionFactorInPlane": 2}
-
-    # TR=2sec, 43 slices,  # ascending sliceorder
-    rs_info = {"SliceEncodingDirection": "k", "SliceTiming": np.arange(0, 2.0, 2. / 43)}
-
     do_deface = True if args.public_output else False
-
-
-    def filter_not_3d_flair(s):
-        if "_3d_" in s:
-            return False
-        else:
-            return True
-
-
-    info_list = [
-        # anatomical
-        {"bids_name": "T1w", "bids_modality": "anat", "search_str": "t1w_", "deface": do_deface,
-         "add_info": {**general_info}},
-        {"bids_name": "T2w", "bids_modality": "anat", "search_str": "t2w_", "deface": do_deface,
-         "add_info": {**general_info}},
-
-        # flair
-        {"bids_name": "FLAIR", "bids_modality": "anat", "search_str": ["2dflair_", "flair_longtr", "_flair_"],
-         "post_glob_filter": filter_not_3d_flair,
-         "acq": "2D",
-         "deface": do_deface,
-         "add_info": {**general_info}},
-        {"bids_name": "FLAIR", "bids_modality": "anat", "search_str": "3d*flair_", "acq": "3D", "deface": do_deface,
-         "add_info": {**general_info}},
-
-        # dwi
-        {"bids_name": "dwi", "bids_modality": "dwi", "search_str": ["_dti_T", "dti_high"], "only_use_last": True,
-         "acq": "ap",
-         "add_info": {**general_info, **sense_info, "PhaseEncodingDirection": "j-"}},
-
-        # func
-        {"bids_name": "bold", "bids_modality": "func", "search_str": ["_fmri_T", "resting2000"], "task": "rest",
-         "physio": True, "add_info": {**general_info, **sense_info, **rs_info, "PhaseEncodingDirection": "j-"}},
-
-        # fieldmaps
-        {"bids_name": "bold", "bids_modality": "fmap", "search_str": ["_fmri_pa_T", "resting_pa"], "acq": "pa",
-         "add_info": {**general_info, **sense_info, **rs_info, "PhaseEncodingDirection": "j"}},
-        {"bids_name": "dwi", "bids_modality": "fmap", "search_str": ["_dti_pa_T", "dti_nodif_pa"], "acq": "pa",
-         "add_info": {**general_info, **sense_info, "PhaseEncodingDirection": "j"}},
-        {"bids_name": "dwi", "bids_modality": "fmap", "search_str": ["_dti_ap_T", "dti_nodif_ap"], "acq": "ap",
-         "add_info": {**general_info, **sense_info, "PhaseEncodingDirection": "j-"}}
-    ]
-
-    dataset_description = {"Name": "LHAB longitudinal healthy aging brain study",
-                           "BIDSVersion": "1.0.0",
-                           "License": "XXXXXX what license is this dataset distributed under? The use of license name "
-                                      "abbreviations is suggested for specifying a license. A list of common licenses"
-                                      " with suggested abbreviations can be found in appendix III.",
-                           "Authors": "XXXXXX List of individuals who contributed to the creation/curation of the dataset",
-                           "Acknowledgements": "XXXXXX who should be acknowledge in helping to collect the data",
-                           "HowToAcknowledge": "XXXXXX Instructions how researchers using this dataset should "
-                                               "acknowledge the original authors. This "
-                                               "field can also be used to define a publication that should be cited in publications that use "
-                                               "the dataset",
-                           "Funding": "XXXXXX sources of funding (grant numbers)"
-                           }
+    info_list_v2 = get_info_list_v2(do_deface)
 
     ###
     if args.participant_label:
@@ -134,8 +59,8 @@ if __name__ == "__main__":
         old_sub_id_list = read_tsv(args.subject_list_file, no_header=True)[0].tolist()
 
     run_conversion(args.raw_dir, args.output_base_dir, args.analysis_level, args.info_out_dir, old_sub_id_list,
-                   args.session_label, args.public_output, args.use_new_ids, args.ds_version, info_list,
-                   dataset_description, args.new_id_lut_file, args.bvecs_from_scanner_file, args.tp6_raw_lut,
+                   args.session_label, args.public_output, args.use_new_ids, args.ds_version, info_list_v2,
+                   dataset_description_v2, args.new_id_lut_file, args.bvecs_from_scanner_file, args.tp6_raw_lut,
                    args.dry_run, args.demo_file)
 
     ## checks

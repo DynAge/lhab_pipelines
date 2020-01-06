@@ -122,12 +122,12 @@ if __name__ == "__main__":
     s = "\n%s" % dt.datetime.now()
     s += "\npublic_output: %s" % public_output
     s += "\nuse_new_ids: %s" % use_new_ids
-    s += "\ninfo_list: %s" % info_list
+    s += "\ninfo_list_v2: %s" % info_list
     if not os.path.exists(info_file):
         with open(info_file, "w") as fi:
             fi.write(s)
 
-    ds_desc_file = os.path.join(output_dir, "dataset_description.json")
+    ds_desc_file = os.path.join(output_dir, "dataset_description_v2.json")
     if not os.path.exists(ds_desc_file):
         description = {"Name": "LHAB longitudinal healthy aging brain study",
                        "BIDSVersion": "1.0.1",
