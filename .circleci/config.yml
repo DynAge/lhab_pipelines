@@ -115,6 +115,73 @@ jobs:
       - store_artifacts:
           path: /tmp/data
 
+  test2:
+    machine:
+      image: circleci/classic:201711-01
+    environment:
+      - DATA_DIR: "/tmp/data_tp6"
+    working_directory: /home/circleci/test
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - restore_cache:
+          keys:
+            - data-v1-{{ .Revision }}
+            - data-v1-
+      - run:
+          name: Install parallel gzip, unzip
+          command: sudo apt-get update && sudo apt-get install pigz unzip
+      - run:
+          name: Download Data
+          command: |
+            mkdir -p ${DATA_DIR} &&
+            if [[ ! -d ${DATA_DIR}/Phantom.zip ]]; then
+              wget -c -O ${DATA_DIR}/Phantom.zip \
+              "https://osf.io/sb4gr/download" && \
+              unzip ${DATA_DIR}/Phantom.zip -d ${DATA_DIR}
+            else
+              echo "Phantom.zip was cached"
+            fi
+      - save_cache:
+          key: data-v1-{{ .Revision }}-{{ epoch }}
+          paths:
+            - /tmp/data_tp6
+      - run:
+          name: Load Docker image layer cache
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+            docker images
+
+      - run:
+          name: tests... conversion test w toy phantom data. tp6 style
+          command: |
+            mkdir -p ${DATA_DIR}
+            docker run -ti --rm -v ${DATA_DIR}:/data ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest \
+            python /code/lhab_pipelines/scripts/nii_conversion/run_nii_conversion.py \
+            /data/Phantom/RAW/ /data/out participant \
+            --participant_label lhab_phan \
+            --session_label T5 T6 \
+            --ds_version phantomas \
+            --info_out_dir /data/out_info \
+            --new_id_lut_file /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW/00_PRIVATE_sub_lists/new_sub_id_lut.tsv \
+            --bvecs_from_scanner_file /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/data/00_bvecs/bvecs.fromscanner \
+            --session_duration_min 0 \
+            --tp6_raw_lut /data/Phantom/RAW/00_PRIVATE_sub_lists/tp6_raw_lut.tsv
+      - run:
+          name: tests... conversion test w toy phantom data. tp6 style. check files
+          command: |
+            docker run -ti --rm -v ${DATA_DIR}:/data ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest \
+            python /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/run_check_nii_conversion_phantom_tp6style.py \
+            /data/out \
+            --participant_label lhab_phan \
+            --ds_version phantomas \
+            --info_out_dir /data/out_info
+      - store_artifacts:
+          path: /tmp/data_tp6
+
   deploy:
     machine:
       image: circleci/classic:201711-01
@@ -158,10 +225,17 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - test2:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /.*/
       - deploy:
           requires:
             - build
             - test1
+            - test2
           filters:
             branches:
               ignore: /.*/

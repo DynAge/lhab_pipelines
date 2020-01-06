@@ -84,4 +84,4 @@ if __name__ == "__main__":
         for f in shouldnotbe_there:
             if os.path.exists(f):
                 raise FileExistsError("A file that the test should NOT produce was found: %s" % f)
-    print("Everthing seems to be fine!")
+    print("Everything seems to be fine!")
