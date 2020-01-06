@@ -49,6 +49,9 @@ if __name__ == "__main__":
     parser.add_argument('--dry_run', help="Don't convert, just collect information", default=False,
                         action='store_true')
     parser.add_argument('--demo_file', help="file with sex and dob")
+    parser.add_argument('--session_duration_min', type=int, default=120,
+                        help="Checks if session duration is smaller x minutes (default: 120). If set to 0, "
+                             "don't check session duration")
 
     args = parser.parse_args()
 
@@ -59,12 +62,12 @@ if __name__ == "__main__":
     if args.participant_label:
         old_sub_id_list = [s.strip() for s in args.participant_label]
     else:
-        old_sub_id_list = read_tsv(args.subject_list_file, no_header=True)[0].tolist()
+        old_sub_id_list = read_tsv(args.subject_list_file, no_header=False).iloc[:, 0].to_list()
 
     run_conversion(args.raw_dir, args.output_base_dir, args.analysis_level, args.info_out_dir, old_sub_id_list,
                    args.session_label, args.public_output, args.use_new_ids, args.ds_version, info_list_v2,
                    dataset_description_v2, args.new_id_lut_file, args.bvecs_from_scanner_file, args.tp6_raw_lut,
-                   args.dry_run, args.demo_file)
+                   args.dry_run, args.demo_file, args.session_duration_min)
 
     # bids validator
     private_str = "_PRIVATE" if not (args.public_output and args.use_new_ids) else ""

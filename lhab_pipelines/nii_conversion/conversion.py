@@ -22,7 +22,7 @@ from .post_conversion_utils import calc_demos, calc_session_duration, get_scan_d
 
 def submit_single_subject(old_subject_id, ses_id_list, raw_dir, output_dir, info_list, info_out_dir,
                           bvecs_from_scanner_file=None, public_output=True, use_new_ids=True,
-                          new_id_lut_file=None, tp6_raw_lut=None, dry_run=False):
+                          new_id_lut_file=None, tp6_raw_lut=None, dry_run=False, session_duration_min=120):
     """
     Loops through raw folders and identifies old_subject_id in tps.
     Pipes available tps into convert_modality
@@ -94,7 +94,10 @@ def submit_single_subject(old_subject_id, ses_id_list, raw_dir, output_dir, info
                 acq_times_dir = info_out_dir / "acq_time_PRIVATE"
                 acq_times_dir.mkdir(parents=True, exist_ok=True)
                 acq_times.to_csv(acq_times_dir / f"sub-{subject}_ses-{session}_acq_times.tsv", sep="\t", index=False)
-                assert duration_minutes < 120, f"Session too long. Check {subject} {session}"
+                if session_duration_min > 0:
+                    assert duration_minutes < session_duration_min, f"Session too long. Check {subject} {session}"
+                else:
+                    print("session_duration_min set to <= 0. Skipping duration test")
 
     if not some_data_found:
         raise FileNotFoundError("No data found for %s. Check again. Stopping..." % old_subject_id)
@@ -287,7 +290,8 @@ def run_dcm2niix(bids_name, bids_modality, bvecs_from_scanner_file, info_out_dir
 
 def run_conversion(raw_dir, output_base_dir, analysis_level, info_out_dir, participant_label, session_label,
                    public_output, use_new_ids, ds_version, info_list, dataset_description, new_id_lut_file=None,
-                   bvecs_from_scanner_file=None, tp6_raw_lut=None, dry_run=False, demo_file=None):
+                   bvecs_from_scanner_file=None, tp6_raw_lut=None, dry_run=False, demo_file=None,
+                   session_duration_min=120):
     # privacy settings
     private_str = "_PRIVATE" if not (public_output and use_new_ids) else ""
     output_dir = Path(output_base_dir) / f"LHAB_{ds_version}{private_str}" / "sourcedata"
@@ -310,7 +314,8 @@ def run_conversion(raw_dir, output_base_dir, analysis_level, info_out_dir, parti
                                   use_new_ids=use_new_ids,
                                   new_id_lut_file=new_id_lut_file,
                                   tp6_raw_lut=tp6_raw_lut,
-                                  dry_run=dry_run)
+                                  dry_run=dry_run,
+                                  session_duration_min=session_duration_min)
         print("\n\n\n\nDONE.\nConverted %d subjects." % len(participant_label))
         print(participant_label)
 

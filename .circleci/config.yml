@@ -100,7 +100,8 @@ jobs:
             --ds_version phantomas \
             --info_out_dir /data/out_info \
             --new_id_lut_file /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW/00_PRIVATE_sub_lists/new_sub_id_lut.tsv \
-            --bvecs_from_scanner_file /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/data/00_bvecs/bvecs.fromscanner
+            --bvecs_from_scanner_file /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/data/00_bvecs/bvecs.fromscanner \
+            --session_duration_min 0
       - run:
           name: tests... conversion test w toy phantom data. tp1 style. check files
           command: |
