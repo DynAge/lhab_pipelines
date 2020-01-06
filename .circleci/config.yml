@@ -97,6 +97,7 @@ jobs:
             python /code/lhab_pipelines/scripts/nii_conversion/run_nii_conversion.py \
             /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW /data/out participant \
             --participant_label lhab_phan \
+            --session_label T1 T3 \
             --ds_version phantomas \
             --info_out_dir /data/out_info \
             --new_id_lut_file /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW/00_PRIVATE_sub_lists/new_sub_id_lut.tsv \
