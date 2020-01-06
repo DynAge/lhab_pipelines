@@ -1,13 +1,4 @@
 """
-CI Test for LHAB conversion pipeline (par to nifti).
-- converts example data set (phantom)
-- tests if files nifti and json files are there
-- tests if sensitive information is deleted
-- runs bids validator
-
-- does NOT check dwi data conversion
-
-- docker run --rm -ti -v ${HOME}/outputs:/data/out fliem/${CIRCLE_PROJECT_REPONAME,,} python /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/run_check_nii_conversion_phantom_tp1style.py /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW /data/out participant --ds_version phantomas
 """
 
 import os, argparse

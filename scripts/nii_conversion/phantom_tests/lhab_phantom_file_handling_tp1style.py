@@ -6,12 +6,12 @@ os.makedirs("01_RAW")
 
 tps = ["T1", "T3"]
 id = "phan"
-mapping = {"lhab_{sub}_fmri_{tp}": "phantom_varscale",
-           "lhab_{sub}_fmri_pa_{tp}": "phantom_varscale",
-           "lhab_{sub}_dti_b0_{tp}": "phantom_varscale",
+mapping = {"lhab_{sub}_fmri_{tp}": "ph_26012017_1151068_2_1_dtinodifapV4",
+           "lhab_{sub}_fmri_pa_{tp}": "ph_26012017_1151068_2_1_dtinodifapV4",
+           "lhab_{sub}_dti_b0_{tp}": "ph_26012017_1151068_2_1_dtinodifapV4",
            "lhab_{sub}_2dflair_{tp}": "Survey_1_1",
            "lhab_{sub}_3dflair_{tp}": "Survey_1_1",
-           "lhab_{sub}_t2w_{tp}": "phantom_varscale",
+           "lhab_{sub}_t2w_{tp}": "Survey_1_1",
            "lhab_{sub}_t1w_{run}_{tp}": "Survey_1_1",
            "lhab_{sub}_dti_{tp}": "ph_26012017_1153144_4_1_dtihighisoeV4",
            "lhab_{sub}_dti_ap_{tp}": "ph_26012017_1151068_2_1_dtinodifapV4",
