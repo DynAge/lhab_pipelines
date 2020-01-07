@@ -45,7 +45,9 @@ def submit_single_subject(old_subject_id, ses_id_list, raw_dir, output_dir, info
             tp6_raw_id = get_public_sub_id(old_subject_id, tp6_raw_lut, from_col="old_id", to_col="tp6_id")
         except KeyError:
             tp6_raw_id = None
-
+    else:
+        tp6_raw_id = None
+        
     some_data_found = False
     for old_ses_id in ses_id_list:
         session_folder = os.path.join(raw_dir, old_ses_id, "01_noIF")
@@ -219,7 +221,7 @@ def convert_modality(old_subject_id, old_ses_id, output_dir, info_out_dir, bids_
                                                  "converted file does not exist. STOP. %s" % nii_file
             physio_in_file_list = []
             if physio:  # convert physiological data
-                physio_search_str = ".".join(par_file.split(".")[:-1]) + "_physio.log"
+                physio_search_str = ".".join(par_file.split(".")[:-1]) + "_*phys*.log"
                 physio_in_file_list = glob(physio_search_str)
                 assert len(physio_in_file_list) < 2, "more than 1  phyio file found for %s" % physio_search_str
 
