@@ -119,7 +119,7 @@ jobs:
     machine:
       image: circleci/classic:201711-01
     environment:
-      - DATA_DIR: "~/data_tp6"
+      - DATA_DIR: "/home/circleci/data_tp6"
     working_directory: /home/circleci/test
     steps:
       - attach_workspace:
@@ -145,7 +145,7 @@ jobs:
       - save_cache:
           key: data-v2-{{ .Revision }}-{{ epoch }}
           paths:
-            - ~/data_tp6
+            - /home/circleci/data_tp6
       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
