@@ -47,7 +47,7 @@ def submit_single_subject(old_subject_id, ses_id_list, raw_dir, output_dir, info
             tp6_raw_id = None
     else:
         tp6_raw_id = None
-        
+
     some_data_found = False
     for old_ses_id in ses_id_list:
         session_folder = os.path.join(raw_dir, old_ses_id, "01_noIF")
@@ -305,8 +305,7 @@ def run_conversion(raw_dir, output_base_dir, analysis_level, info_out_dir, parti
     private_str = "_PRIVATE" if not (public_output and use_new_ids) else ""
     output_dir = Path(output_base_dir) / f"LHAB_{ds_version}{private_str}" / "sourcedata"
 
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
     info_out_dir = Path(info_out_dir) / "PRIVATE"
     info_out_dir.mkdir(parents=True, exist_ok=True)
 
