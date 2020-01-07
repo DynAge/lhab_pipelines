@@ -52,9 +52,7 @@ mapping_parrec_orig = {
     'ph_20181019_134814_9_1_wipt1w_3d_tfe_puk': "t1w_b",
     'ph_20181019_135559_10_1_wip3d_brain_view_flair_sh': "3dflair"
 }
-touch = [
-    f"{pref}fmri{suf}_physio.log"
-]
+touch = []
 
 mapping_parrec = expand_mapping_parrec_orig(mapping_parrec_orig)
 
@@ -86,7 +84,7 @@ filenames = ['ph_20181019_130724_2_1_wipt1w_3d_tfe_puk',
 
 mapping_parrec_orig = {k: k for k in filenames}
 
-touch = []  # ["SCANPHYSLOG_ph_20181019_131706_4_1_wipresting2000_tarasense.log"]
+touch = []
 
 mapping_parrec = expand_mapping_parrec_orig(mapping_parrec_orig)
 
