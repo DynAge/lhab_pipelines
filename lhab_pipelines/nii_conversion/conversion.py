@@ -288,7 +288,8 @@ def run_dcm2niix(bids_name, bids_modality, bvecs_from_scanner_file, info_out_dir
     dcm_conversion_info_dir.mkdir(parents=True, exist_ok=True)
     dcm_conversion_info_file = dcm_conversion_info_dir / f"{out_filename}.txt"
     orig_file = Path(nii_output_dir) / f"{out_filename}.txt"
-    shutil.move(str(orig_file), str(dcm_conversion_info_file))
+    shutil.copyfile(str(orig_file), str(dcm_conversion_info_file))
+    orig_file.unlink()
 
     # rotate bvecs and add angulation to json for dwi
     if (bids_name == "dwi") & (bids_modality != "fmap"):
