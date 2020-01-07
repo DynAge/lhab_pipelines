@@ -138,7 +138,7 @@ jobs:
             if [[ ! -d ${DATA_DIR}/Phantom.zip ]]; then
               wget -c -O ${DATA_DIR}/Phantom.zip \
               "https://osf.io/sb4gr/download" && \
-              unzip ${DATA_DIR}/Phantom.zip -d ${DATA_DIR}
+              unzip -o ${DATA_DIR}/Phantom.zip -d ${DATA_DIR}
             else
               echo "Phantom.zip was cached"
             fi
