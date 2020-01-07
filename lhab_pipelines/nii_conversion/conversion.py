@@ -41,7 +41,10 @@ def submit_single_subject(old_subject_id, ses_id_list, raw_dir, output_dir, info
     else:
         public_sub_id = None
     if tp6_raw_lut:
-        tp6_raw_id = get_public_sub_id(old_subject_id, tp6_raw_lut, from_col="old_id", to_col="tp6_id")
+        try:  # some old_subjects are not in tp6
+            tp6_raw_id = get_public_sub_id(old_subject_id, tp6_raw_lut, from_col="old_id", to_col="tp6_id")
+        except KeyError:
+            tp6_raw_id = None
 
     some_data_found = False
     for old_ses_id in ses_id_list:
@@ -52,7 +55,11 @@ def submit_single_subject(old_subject_id, ses_id_list, raw_dir, output_dir, info
             folder_subject_id = tp6_raw_id
         else:
             folder_subject_id = old_subject_id
-        subject_folder = sorted(glob(folder_subject_id + "*"))
+
+        if (old_ses_id == "T6") & (not tp6_raw_id): # if subject not in tp6
+            subject_folder = []
+        else:
+            subject_folder = sorted(glob(folder_subject_id + "*"))
         assert len(subject_folder) < 2, "more than one subject folder %s" % old_subject_id
 
         converted_par_files, converted_physio_files, mapping = [], [], []
