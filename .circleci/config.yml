@@ -119,15 +119,15 @@ jobs:
     machine:
       image: circleci/classic:201711-01
     environment:
-      - DATA_DIR: "/tmp/data_tp6"
+      - DATA_DIR: "~/data_tp6"
     working_directory: /home/circleci/test
     steps:
       - attach_workspace:
           at: /tmp
       - restore_cache:
           keys:
-            - data-v1-{{ .Revision }}
-            - data-v1-
+            - data-v2-{{ .Revision }}
+            - data-v2-
       - run:
           name: Install parallel gzip, unzip
           command: sudo apt-get update && sudo apt-get install pigz unzip
@@ -143,9 +143,9 @@ jobs:
               echo "Phantom.zip was cached"
             fi
       - save_cache:
-          key: data-v1-{{ .Revision }}-{{ epoch }}
+          key: data-v2-{{ .Revision }}-{{ epoch }}
           paths:
-            - /tmp/data_tp6
+            - ~/data_tp6
       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
@@ -158,7 +158,6 @@ jobs:
       - run:
           name: tests... conversion test w toy phantom data. tp6 style
           command: |
-            mkdir -p ${DATA_DIR}
             docker run -ti --rm -v ${DATA_DIR}:/data ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest \
             python /code/lhab_pipelines/scripts/nii_conversion/run_nii_conversion.py \
             /data/Phantom/RAW/ /data/out participant \

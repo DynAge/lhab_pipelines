@@ -58,7 +58,7 @@ def submit_single_subject(old_subject_id, ses_id_list, raw_dir, output_dir, info
         else:
             folder_subject_id = old_subject_id
 
-        if (old_ses_id == "T6") & (not tp6_raw_id): # if subject not in tp6
+        if (old_ses_id == "T6") & (not tp6_raw_id):  # if subject not in tp6
             subject_folder = []
         else:
             subject_folder = sorted(glob(folder_subject_id + "*"))
@@ -221,8 +221,11 @@ def convert_modality(old_subject_id, old_ses_id, output_dir, info_out_dir, bids_
                                                  "converted file does not exist. STOP. %s" % nii_file
             physio_in_file_list = []
             if physio:  # convert physiological data
-                physio_search_str = ".".join(par_file.split(".")[:-1]) + "_*phys*.log"
-                physio_in_file_list = glob(physio_search_str)
+                physio_search_str_list = [".".join(par_file.split(".")[:-1]) + "_*phys*.log",
+                                          "SCANPHYSLOG_" + ".".join(par_file.split(".")[:-1]) + ".log"]
+                physio_in_file_list = []
+                for physio_search_str in physio_search_str_list:
+                    physio_in_file_list += glob(physio_search_str)
                 assert len(physio_in_file_list) < 2, "more than 1  phyio file found for %s" % physio_search_str
 
                 if physio_in_file_list and not dry_run:
