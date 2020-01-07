@@ -1,5 +1,6 @@
 import datetime as dt
 import os
+import shutil
 from glob import glob
 from os.path import join as oj
 
@@ -286,7 +287,8 @@ def run_dcm2niix(bids_name, bids_modality, bvecs_from_scanner_file, info_out_dir
     dcm_conversion_info_dir = info_out_dir / "dcm2niix_conversion_PRIVATE"
     dcm_conversion_info_dir.mkdir(parents=True, exist_ok=True)
     dcm_conversion_info_file = dcm_conversion_info_dir / f"{out_filename}.txt"
-    (Path(nii_output_dir) / f"{out_filename}.txt").replace(dcm_conversion_info_file)
+    orig_file = Path(nii_output_dir) / f"{out_filename}.txt"
+    shutil.move(str(orig_file), str(dcm_conversion_info_file))
 
     # rotate bvecs and add angulation to json for dwi
     if (bids_name == "dwi") & (bids_modality != "fmap"):
