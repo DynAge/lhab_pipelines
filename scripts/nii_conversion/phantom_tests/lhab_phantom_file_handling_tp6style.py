@@ -27,6 +27,7 @@ slist_dir.mkdir(parents=True, exist_ok=True)
 
 (slist_dir / "new_sub_id_lut.tsv").write_text("old_id\tnew_id\nlhab_phan\tlhabX9999\n")
 (slist_dir / "phan_id_list.tsv").write_text("sub_id\nlhab_phan")
+(slist_dir / "tp6_raw_lut.tsv").write_text("old_id\ttp6_id\nlhab_phan\tlhab_01_ph_t6")
 
 bvecs_dir = out_base_dir / "00_bvecs"
 if bvecs_dir.is_dir():

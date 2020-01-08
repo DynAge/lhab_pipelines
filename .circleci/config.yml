@@ -126,8 +126,8 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - data-v3-{{ .Revision }}
-            - data-v3-
+            - data-v4-{{ .Revision }}
+            - data-v4-
       - run:
           name: Install parallel gzip, unzip
           command: sudo apt-get update && sudo apt-get install pigz unzip
@@ -143,7 +143,7 @@ jobs:
               echo "Phantom.zip was cached"
             fi
       - save_cache:
-          key: data-v3-{{ .Revision }}-{{ epoch }}
+          key: data-v4-{{ .Revision }}-{{ epoch }}
           paths:
             - /home/circleci/data_tp6
       - run:
