@@ -1,6 +1,6 @@
 import pandas as pd
-from glob import glob
-import os, shutil, datetime
+import shutil, datetime
+from pathlib import Path
 
 
 def write_log(log_file, log):
@@ -8,156 +8,66 @@ def write_log(log_file, log):
         fi.write(" ".join(log))
 
 
-def move_excluded_t1w_scans(source_path, mri_qc_path, exclusion_path, exclusion_file):
-    """ Function takes exclusion file moves t1w/json and mriqc files to exclusion_path
-    exclusion file: (excel file with exclue ({nan, 1}) column and excludes exclude==1 scans
-    subject_id	session_id	run_id	report_file	exclude
-    lhabXX1	tp1	1	sub-lhabXX1_ses-tp1_run-1_T1w.html	1
-    lhabXX2	tp3	2	sub-lhabXX2_ses-tp3_run-2_T1w.html
+def move_excluded_scans(source_path, exclusion_path, exclusion_file, participant_label=None):
+    """ Function takes exclusion file moves scans(and additional files json/bvec...) to exclusion_path
+    exclusion file excel with following columns:
+        - exclude: ({nan, 1}); excludes exclude==1
+        - base_path: path of pattern to be excluded from source path e.g.,
+            if participant_label is given, subject is extracted from base_path
+        - can include other columns (e.g., info) that will be ignored
+    e.g.,
+    base_path	                                                exclude	    info
+    sub-lhabX0/ses-tp1/dwi/sub-lhabX0_ses-tp1_acq-ap_run-1_dwi	1	        SIMULTAED
 
+    writes a logfile to exclusion_path / 00_log.txt
     """
-    log_file = os.path.join(exclusion_path, "00_log.txt")
-    log = ["\n\n*************", str(datetime.datetime.now()), "\n", exclusion_file, "\n"]
+    df = pd.read_excel(exclusion_file)
+    # if given, only work with selected participant_label
+    if participant_label:
+        participant_label = [s if s.startswith("sub-") else f"sub-{s}" for s in participant_label]
+        df["subject"] = df.base_path.str.split("/").str[0]
+        df = df.loc[df.subject.isin(participant_label)]
+    bad_scans = df.loc[df.exclude == 1]
+
+    source_path = Path(source_path)
+    exclusion_path = Path(exclusion_path)
+    exclusion_path.mkdir(exist_ok=True, parents=True)
+
+    log_file = exclusion_path / "00_log.txt"
+    log = [f"\n\n*************\n{datetime.datetime.now()}\n{exclusion_file}, {source_path}, {exclusion_path}, \
+           {participant_label}\n"]
     write_log(log_file, log)
 
-    df = pd.read_excel(exclusion_file)
-    bad_scans = df[df.exclude == 1]
+    for base_path in bad_scans.base_path:
+        base_path = Path(base_path)
+        target_path = exclusion_path / base_path.parent
+        target_path.mkdir(exist_ok=True, parents=True)
 
-    for i in range(len(bad_scans)):
-        df_subject = bad_scans.iloc[[i]]
-        bad_scan = df_subject.report_file.tolist()[0].split(".")[0]
-        subject = "sub-" + df_subject.subject_id.tolist()[0]
+        candidate_files_source = list(source_path.glob(str(base_path) + "*"))
+        candidate_files_target = list(exclusion_path.glob(str(base_path) + "*"))
 
-        move_files = {}
-        paths = {"anat": os.path.join(source_path, subject, "*/*"),
-                 "qc_derivatives": os.path.join(mri_qc_path, "derivatives"),
-                 "qc_reports": os.path.join(mri_qc_path, "reports")}
-
-        # create folder structure
-        for kind, p in paths.items():
-            target_path = os.path.join(exclusion_path, kind)
-            if not os.path.exists(target_path):
-                os.makedirs(target_path)
-
-        # we expect 4 files (nii, json, qc report, qc derivatives)
-        n_files_expected = 4
-        for kind, p in paths.items():
-            search_str = os.path.join(p, bad_scan + "*")
-            search_files = sorted(glob(search_str))
-            if search_files:
-                move_files[kind] = search_files
+        if not candidate_files_source:
+            if len(candidate_files_target) > 0:
+                print(f"No files found in sourcefolder. These files have already been moved {candidate_files_target}")
             else:
-                target_path = os.path.join(exclusion_path, kind)
-                search_str = os.path.join(target_path, bad_scan + "*")
-                search_files = sorted(glob(search_str))
-                if search_files:
-                    print("files already moved: %s" % search_str)
-                    n_files_expected -= len(search_files)
-                else:
-                    raise Exception("files not found in source or target folder: %s. STOPPING" % search_str)
+                raise Exception(f"files not found in source or target folder: {base_path}. STOPPING")
 
-        # check that expected number of file are moved
-        n_files = 0
-        for v in move_files.values():
-            n_files += len(v)
-        if n_files != n_files_expected:
-            raise Exception("len move_files:%s\n %s" % (n_files, df_subject))
+        for source_file in candidate_files_source:
+            target_file = target_path / source_file.name
+            if target_file.is_file():
+                raise FileExistsError(target_file)
 
-        # move files and remove line from scans file
-        for kind, source_files in move_files.items():
-            target_path = os.path.join(exclusion_path, kind)
-
-            # remove line from scans file
-            if kind == "anat":
-                scans_file = os.path.join(source_path, subject, subject + "_scans.tsv")
-                scans = pd.read_csv(scans_file, sep="\t")
-                removed_line = scans[scans.filename.str.contains(bad_scan)]
-                scans = scans[~scans.filename.str.contains(bad_scan)]
-                scans.to_csv(scans_file, sep="\t", index=False)
-                log = ["removed " + bad_scan + " from " + scans_file + "\n"]
-                write_log(log_file, log)
-
-            # move files
-            for source_file in source_files:
-                filename = os.path.basename(source_file)
-                if os.path.exists(os.path.join(target_path, filename)):
-                    raise Exception(
-                        "file already exists, something went wrong: %s" % os.path.join(target_path, filename))
-                shutil.move(source_file, os.path.join(target_path, filename))
-                log = ["moved " + source_file + " to " + os.path.join(target_path, filename) + "\n"]
-                write_log(log_file, log)
-
-        write_log(log_file, ["\n"])
-
-
-def move_excluded_scans(source_path, exclusion_path, exclusion_file):
-    """ Function takes exclusion file moves scans(and addiational files json/bvec...) to exclusion_path
-    exclusion file: (excel file with exclue ({nan, 1}) column and excludes exclude==1 scans
-    subject_id	session_id	run_id	modality	scan	exclude	info
-    lhabXX1	tp1	1	dwi	sub-lhabXX1_ses-tp3_acq-ap_run-1_dwi	1
-
-    """
-    log_file = os.path.join(exclusion_path, "00_log.txt")
-    log = ["\n\n*************", str(datetime.datetime.now()), "\n", exclusion_file, "\n"]
-    write_log(log_file, log)
-
-    df = pd.read_excel(exclusion_file)
-    bad_scans = df[df.exclude == 1]
-
-    for i in range(len(bad_scans)):
-        df_subject = bad_scans.iloc[[i]]
-        bad_scan = df_subject.scan.tolist()[0]
-        subject = "sub-" + df_subject.subject_id.tolist()[0]
-        modality = df_subject.modality.tolist()[0]
-        session_id = "ses-" + df_subject.session_id.tolist()[0]
-        move_files = {}
-
-        paths = {modality: os.path.join(source_path, subject, session_id, modality),
-                 }
-
-        # create folder structure
-        for kind, p in paths.items():
-            target_path = os.path.join(exclusion_path, kind)
-            if not os.path.exists(target_path):
-                os.makedirs(target_path)
-
-        removed_scans = []
-        for kind, p in paths.items():
-            search_str = os.path.join(p, bad_scan + "*")
-            search_files = sorted(glob(search_str))
-            print(search_str, search_files)
-            if search_files:
-                move_files[kind] = search_files
-                removed_scans.append(os.path.join(modality, bad_scan))
-            else:
-                target_path = os.path.join(exclusion_path, kind)
-                search_str = os.path.join(target_path, bad_scan + "*")
-                search_files = sorted(glob(search_str))
-                if search_files:
-                    print("files already moved: %s" % search_str)
-                else:
-                    raise Exception("files not found in source or target folder: %s. STOPPING" % search_str)
-
-        # move files
-        for kind, source_files in move_files.items():
-            target_path = os.path.join(exclusion_path, kind)
-            for source_file in source_files:
-                filename = os.path.basename(source_file)
-                if os.path.exists(os.path.join(target_path, filename)):
-                    raise Exception(
-                        "file already exists, something went wrong: %s" % os.path.join(target_path, filename))
-                shutil.move(source_file, os.path.join(target_path, filename))
-                log = ["moved " + source_file + " to " + os.path.join(target_path, filename) + "\n"]
-                write_log(log_file, log)
-
-        # remove line from scans file
-        for scan in removed_scans:
-            scans_file = os.path.join(source_path, subject, subject + "_scans.tsv")
-            scans = pd.read_csv(scans_file, sep="\t")
-            removed_line = scans[scans.filename.str.contains(scan)]
-            scans = scans[~scans.filename.str.contains(scan)]
-            scans.to_csv(scans_file, sep="\t", index=False)
-            log = ["removed " + scan + " from " + scans_file + "\n"]
+            target_file.parent.mkdir(exist_ok=True, parents=True)
+            shutil.move(str(source_file), str(target_file))
+            log = [f"moved {source_file} to {target_file} \n"]
             write_log(log_file, log)
 
-        write_log(log_file, ["\n"])
+        if candidate_files_source:
+            # remove source modality folder if its not empty
+            source_modality_path = candidate_files_source[0].parent
+            dir_empty = len(list(source_modality_path.glob("*"))) == 0
+            if dir_empty:
+                source_modality_path.rmdir()
+                log = [f"{source_modality_path} removed\n"]
+                write_log(log_file, log)
+    print("DONE")
