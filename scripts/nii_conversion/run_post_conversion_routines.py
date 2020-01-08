@@ -80,16 +80,7 @@ if __name__ == "__main__":
 
 
     print("Exporting demos...")
-    calc_demos(output_dir,
-               ses_id_list,
-               raw_dir,
-               in_ses_folder,
-               demo_file,
-               pwd,
-               use_new_ids=use_new_ids,
-               new_id_lut_file=new_id_lut_file,
-               public_output=public_output,
-               )
+    calc_demos(output_dir, ses_id_list, demo_file, pwd, new_id_lut_file=new_id_lut_file)
 
     print("Collecting scan durations...")
     get_scan_duration(output_dir)

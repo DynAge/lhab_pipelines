@@ -1,18 +1,3 @@
-"""
-
-|-- T1
-|   `-- 01_noIF
-|       `-- lhab_xxxx_t1_raw
-|           |-- lhab_xxxx_2dflair_T1.par
-|           |-- lhab_xxxx_2dflair_T1.rec
-...
-|-- T2
-|   `-- 01_noIF
-|       `-- lhab_xxxx_t2_raw
-|           |-- lhab_xxxx_2dflair_T2.par
-|           |-- lhab_xxxx_2dflair_T2.rec
-"""
-
 import os, argparse
 from pathlib import Path
 
@@ -59,22 +44,20 @@ if __name__ == "__main__":
     info_list_v2 = get_info_list_v2(do_deface)
 
     ###
-    if args.participant_label:
-        old_sub_id_list = [s.strip() for s in args.participant_label]
+    if args.analysis_level == "participant":
+        if args.participant_label:
+            old_sub_id_list = [s.strip() for s in args.participant_label]
+        else:
+            old_sub_id_list = read_tsv(args.subject_list_file, no_header=False).iloc[:, 0].to_list()
+    elif args.analysis_level == "group":
+        # participants automatically derived
+        old_sub_id_list = []
     else:
-        old_sub_id_list = read_tsv(args.subject_list_file, no_header=False).iloc[:, 0].to_list()
+        raise RuntimeError(f"Analysis level unknown {args.analysis_level}")
 
     run_conversion(args.raw_dir, args.output_base_dir, args.analysis_level, args.info_out_dir, old_sub_id_list,
                    args.session_label, args.public_output, args.use_new_ids, args.ds_version, info_list_v2,
                    dataset_description_v2, args.new_id_lut_file, args.bvecs_from_scanner_file, args.tp6_raw_lut,
                    args.dry_run, args.demo_file, args.session_duration_min)
 
-    # bids validator
-    private_str = "_PRIVATE" if not (args.public_output and args.use_new_ids) else ""
-    output_dir = Path(args.output_base_dir) / f"LHAB_{args.ds_version}{private_str}" / "sourcedata"
 
-    print("X" * 20 + "\nRuning BIDS validator")
-    os.system("bids-validator %s" % output_dir)
-
-    print("\n\n\n\nDONE.\nConverted %d subjects." % len(old_sub_id_list))
-    print(old_sub_id_list)

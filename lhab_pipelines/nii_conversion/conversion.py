@@ -2,7 +2,6 @@ import datetime as dt
 import os
 import shutil
 from glob import glob
-from os.path import join as oj
 
 import numpy as np
 from pathlib import Path
@@ -11,6 +10,7 @@ import getpass
 
 from .interface import Dcm2niix_par
 from nipype.interfaces.fsl import Reorient2Std
+from bids import BIDSLayout
 
 import lhab_pipelines
 from lhab_pipelines.utils import add_info_to_json, concat_tsvs
@@ -18,7 +18,7 @@ from .utils import get_public_sub_id, get_clean_ses_id, get_clean_subject_id, \
     deface_data, dwi_treat_bvecs, add_additional_bids_parameters_from_par, \
     add_flip_angle_from_par, add_total_readout_time_from_par, parse_physio, save_physio, get_par_info, get_image_acq
 from .post_conversion_utils import calc_demos, calc_session_duration, get_scan_duration, \
-    compare_par_nii, reduce_sub_files
+    reduce_sub_files
 
 
 def submit_single_subject(old_subject_id, ses_id_list, raw_dir, output_dir, info_list, info_out_dir,
@@ -334,30 +334,16 @@ def run_conversion(raw_dir, output_base_dir, analysis_level, info_out_dir, parti
         print(participant_label)
 
     elif analysis_level == "group":
-        info_file = info_out_dir / "info.txt"
-        s = f"""{dt.datetime.now()}
-        public_output: {public_output}
-        use_new_ids: {use_new_ids}
-        info_list: {info_list}        
-        """
-        info_file.write_text(s)
-
         ds_desc_file = output_dir / "dataset_description.json"
         if ds_desc_file.is_file():
             ds_desc_file.unlink()
         dataset_description["DataSetVersion"] = ds_version
         add_info_to_json(ds_desc_file, dataset_description, create_new=True)
 
-        print("\n Check that all subjecst are present and compare par and nii count, export nii count...")
-        layout = compare_par_nii(output_dir, participant_label, use_new_ids, raw_dir, session_label, info_list,
-                                 new_id_lut_file, excluded_dir="", tp6_raw_lut=tp6_raw_lut)
-        layout.to_df().to_csv(output_dir / "layout.csv", index=False)
-
         # Demos
         print("Exporting demos...")
         pwd = getpass.getpass("Enter the Password for dob file:")
-        calc_demos(output_dir, info_out_dir, session_label, raw_dir, demo_file, pwd, use_new_ids=use_new_ids,
-                   new_id_lut_file=new_id_lut_file, tp6_raw_lut=tp6_raw_lut)
+        calc_demos(output_dir, info_out_dir, demo_file, pwd, new_id_lut_file=new_id_lut_file)
 
         print("Collecting scan durations...")
         get_scan_duration(output_dir)
@@ -365,3 +351,13 @@ def run_conversion(raw_dir, output_base_dir, analysis_level, info_out_dir, parti
         # concat notconverted files
         unconv_df = concat_tsvs(info_out_dir / "unconverted_files")
         unconv_df.to_csv(info_out_dir / "unconverted_files.tsv", sep="\t", index=False)
+
+        print("X" * 20 + "\nRuning BIDS validator")
+        os.system(f"bids-validator {str(output_dir)}")
+
+        print("\n Get BIDS layout")
+        layout = BIDSLayout(output_dir)
+        layout.to_df().to_csv(output_dir / "layout.csv", index=False)
+
+    else:
+        raise RuntimeError(f"Analysis level unknown {analysis_level}")

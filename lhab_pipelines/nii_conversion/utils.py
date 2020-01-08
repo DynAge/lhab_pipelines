@@ -313,26 +313,26 @@ def parse_acq_time(general_info):
     return acq_time
 
 
-def fetch_demos(demo_df, old_subject_id, bids_sub, bids_ses, par_file):
-    """
-    get sex and dob and calculate age (using acquisition time)
-    returns df
-    """
-    demo_df = demo_df.loc[old_subject_id]
-    general_info, image_defs = read_par(par_file)
-
-    acq_time = parse_acq_time(general_info)
-    dob = pd.to_datetime(demo_df["dob"], format="%Y-%m-%d")
-
-    age = "{0:.1f}".format((acq_time - dob).days / 365.25)
-    sex = demo_df["sex"]
-    out_df = pd.DataFrame({"participant_id": [bids_sub], "session_id": [bids_ses], "age": [age], "sex": [sex]},
-                          columns=["participant_id", "session_id", "age", "sex"])
-    out_acq_time_df = pd.DataFrame({"participant_id": [bids_sub], "session_id": [bids_ses], "acq_time": [acq_time]},
-                                   columns=["participant_id", "session_id", "acq_time"])
-
-    return out_df, out_acq_time_df
-
+# def fetch_demos(demo_df, old_subject_id, bids_sub, bids_ses, par_file):
+#     """
+#     get sex and dob and calculate age (using acquisition time)
+#     returns df
+#     """
+#     demo_df = demo_df.loc[old_subject_id]
+#     general_info, image_defs = read_par(par_file)
+#
+#     acq_time = parse_acq_time(general_info)
+#     dob = pd.to_datetime(demo_df["dob"], format="%Y-%m-%d")
+#
+#     age = "{0:.1f}".format((acq_time - dob).days / 365.25)
+#     sex = demo_df["sex"]
+#     out_df = pd.DataFrame({"participant_id": [bids_sub], "session_id": [bids_ses], "age": [age], "sex": [sex]},
+#                           columns=["participant_id", "session_id", "age", "sex"])
+#     out_acq_time_df = pd.DataFrame({"participant_id": [bids_sub], "session_id": [bids_ses], "acq_time": [acq_time]},
+#                                    columns=["participant_id", "session_id", "acq_time"])
+#
+#     return out_df, out_acq_time_df
+#
 
 def parse_physio(input_file):
     """
