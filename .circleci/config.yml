@@ -126,8 +126,8 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - data-v4-{{ .Revision }}
-            - data-v4-
+            - data-v5-{{ .Revision }}
+            - data-v5-
       - run:
           name: Install parallel gzip, unzip
           command: sudo apt-get update && sudo apt-get install pigz unzip
@@ -137,13 +137,13 @@ jobs:
             mkdir -p ${DATA_DIR} &&
             if [[ ! -d ${DATA_DIR}/Phantom.zip ]]; then
               wget -c -O ${DATA_DIR}/Phantom.zip \
-              "https://osf.io/sb4gr/download" && \
+              "https://osf.io/4z5hu/download" && \
               unzip -o ${DATA_DIR}/Phantom.zip -d ${DATA_DIR}
             else
               echo "Phantom.zip was cached"
             fi
       - save_cache:
-          key: data-v4-{{ .Revision }}-{{ epoch }}
+          key: data-v5-{{ .Revision }}-{{ epoch }}
           paths:
             - /home/circleci/data_tp6
       - run:
