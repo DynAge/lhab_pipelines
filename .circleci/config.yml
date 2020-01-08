@@ -165,8 +165,8 @@ jobs:
             --session_label T5 T6 \
             --ds_version phantomas \
             --info_out_dir /data/out_info \
-            --new_id_lut_file /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW/00_PRIVATE_sub_lists/new_sub_id_lut.tsv \
-            --bvecs_from_scanner_file /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/data/00_bvecs/bvecs.fromscanner \
+            --new_id_lut_file /data/Phantom/RAW/00_PRIVATE_sub_lists/new_sub_id_lut.tsv \
+            --bvecs_from_scanner_file /data/Phantom/RAW/00_bvecs/bvecs.fromscanner \
             --session_duration_min 0 \
             --tp6_raw_lut /data/Phantom/RAW/00_PRIVATE_sub_lists/tp6_raw_lut.tsv
       - run:
