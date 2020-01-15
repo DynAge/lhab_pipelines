@@ -23,17 +23,7 @@ def filter_not_3d_flair(s):
 
 
 dataset_description_v2 = {"Name": "LHAB longitudinal healthy aging brain study",
-                          "BIDSVersion": "1.0.0",
-                          "License": "XXXXXX what license is this dataset distributed under? The use of license name "
-                                     "abbreviations is suggested for specifying a license. A list of common licenses"
-                                     " with suggested abbreviations can be found in appendix III.",
-                          "Authors": "XXXXXX List of individuals who contributed to the creation/curation of the dataset",
-                          "Acknowledgements": "XXXXXX who should be acknowledge in helping to collect the data",
-                          "HowToAcknowledge": "XXXXXX Instructions how researchers using this dataset should "
-                                              "acknowledge the original authors. This "
-                                              "field can also be used to define a publication that should be cited in publications that use "
-                                              "the dataset",
-                          "Funding": "XXXXXX sources of funding (grant numbers)"
+                          "BIDSVersion": "1.2.1"
                           }
 
 
@@ -66,14 +56,17 @@ def get_info_list_v2(do_deface):
          },
 
         # fieldmaps
-        {"bids_name": "bold", "bids_modality": "fmap", "search_str": ["_fmri_pa_T", "resting_pa"], "acq": "pa",
+        {"bids_name": "epi", "bids_modality": "fmap", "search_str": ["_fmri_pa_T", "resting_pa"],
+         "acq": "bold", "direction": "PA",
          "add_info": {**general_info, **sense_info, **rs_info, "PhaseEncodingDirection": "j"}
          },
-        {"bids_name": "dwi", "bids_modality": "fmap", "search_str": ["_dti_pa_T", "dti_nodif_pa"], "acq": "pa",
-         "add_info": {**general_info, **sense_info, "PhaseEncodingDirection": "j"}
+        {"bids_name": "epi", "bids_modality": "fmap", "search_str": ["_dti_pa_T", "dti_nodif_pa"],
+         "acq": "dwi",
+         "direction": "PA", "add_info": {**general_info, **sense_info, "PhaseEncodingDirection": "j"}
          },
-        {"bids_name": "dwi", "bids_modality": "fmap", "search_str": ["_dti_ap_T", "dti_nodif_ap"], "acq": "ap",
-         "add_info": {**general_info, **sense_info, "PhaseEncodingDirection": "j-"}
+        {"bids_name": "epi", "bids_modality": "fmap", "search_str": ["_dti_ap_T", "dti_nodif_ap"],
+         "acq": "dwi",
+         "direction": "AP", "add_info": {**general_info, **sense_info, "PhaseEncodingDirection": "j-"}
          }
     ]
     return info_list_v2
