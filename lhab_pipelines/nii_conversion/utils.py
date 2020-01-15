@@ -19,16 +19,16 @@ def get_clean_ses_id(old_ses_id):
     return "tp" + old_ses_id[1:]
 
 
-def get_public_sub_id(old_sub_id, lut_file):
+def get_public_sub_id(old_sub_id, lut_file, from_col="old_id", to_col="new_id"):
     """returns public sub_id of style lhabX0001
     if old_subj_id is string: returns string
     if old_subj_id is list: returns list """
     df = pd.read_csv(lut_file, sep="\t")
-    df = df.set_index("old_id")
+    df = df.set_index(from_col)
     if isinstance(old_sub_id, str):
         return df.loc[old_sub_id].values[0]
     else:
-        out_list = df.loc[old_sub_id, "new_id"].tolist() #df.loc[old_sub_id].ix[:, 0].tolist()
+        out_list = df.loc[old_sub_id, to_col].tolist()
         assert len(out_list) == len(old_sub_id), "In and out list not the same length %s, %s" % (out_list, old_sub_id)
         return out_list
 
@@ -42,7 +42,7 @@ def get_private_sub_id(new_sub_id, lut_file):
     if isinstance(new_sub_id, str):
         return df.loc[new_sub_id].values[0]
     else:
-        out_list = df.loc[new_sub_id].ix[:, 0].tolist()
+        out_list = df.loc[new_sub_id].iloc[:, 0].tolist()
         assert len(out_list) == len(new_sub_id), "In and out list not the same length %s, %s" % (out_list, new_sub_id)
         return out_list
 
@@ -94,6 +94,15 @@ def update_sub_scans_file(output_dir, bids_sub, bids_ses, bids_modality, out_fil
     else:
         scans = scans[["participant_id", "session_id", "filename"]]
     to_tsv(scans, scans_file)
+
+
+def get_image_acq(par_files):
+    df = pd.DataFrame()
+    for par in par_files:
+        general_info, image_defs = read_par(par)
+        acq_time = parse_acq_time(general_info)
+        df = df.append(pd.DataFrame({"file": [par], "acq_time": [acq_time]}))
+    return df
 
 
 # PAR IO
@@ -178,7 +187,7 @@ def deface_data(nii_file, nii_output_dir, out_filename):
     old_wd = os.getcwd()
     os.chdir(nii_output_dir)
     defaced_file = os.path.join(nii_output_dir, out_filename + "_defaced.nii.gz")
-    cmd = "pydeface.py {in_file} {defaced_file}".format(in_file=nii_file, defaced_file=defaced_file)
+    cmd = f"pydeface {nii_file}"
     print(cmd)
     os.system(cmd)
     # replace file with face with defaced file
@@ -216,25 +225,25 @@ def rotate_bvecs(bvecs_from_scanner, par_file):
 
 
 def rotate_vectors(directions, ap, fh, rl, orient):
-    # python implementation of matlab script rotDir
-    #
-    # function to rotate diffusion directions from a Philips *.par file
-    # returns rotated bvecs in RAS space; test with LHAB data
-    #  input:
-    #            directions : diffusion directions ( nx3 matrix ) [ap fh rl]
-    #            ap         : angulation AP ( in degrees )
-    #            fh         : angulation FH ( in degrees )
-    #            rl         : angulation RL ( in degrees )
-    #            orient     : orientation ( TRA==1 / SAG==2 / COR==3 )
-    #
-    #  output:
-    #            directions : rotatet diffusion directions ( nx3 matrix )
-    #
-    #
-    #  BEWARE : Angulations are iverted versions of par file angulations
-    #           the angulations are expected to be in degrees
+    """
+    python implementation of matlab script rotDir
+
+    function to rotate diffusion directions from a Philips *.par file
+    returns rotated bvecs in RAS space; test with LHAB data
+     input:
+               directions : diffusion directions ( nx3 matrix ) [ap fh rl]
+               ap         : angulation AP ( in degrees )
+               fh         : angulation FH ( in degrees )
+               rl         : angulation RL ( in degrees )
+               orient     : orientation ( TRA==1 / SAG==2 / COR==3 )
+
+     output:
+               directions : rotatet diffusion directions ( nx3 matrix )
 
 
+     BEWARE : Angulations are iverted versions of par file angulations
+              the angulations are expected to be in degrees
+    """
     pi, sin, cos = np.pi, np.sin, np.cos
     ap = ap * pi / 180.
     fh = fh * pi / 180.
@@ -306,27 +315,6 @@ def parse_acq_time(general_info):
     return acq_time
 
 
-def fetch_demos(demo_df, old_subject_id, bids_sub, bids_ses, par_file):
-    """
-    get sex and dob and calculate age (using acquisition time)
-    returns df
-    """
-    demo_df = demo_df.loc[old_subject_id]
-    general_info, image_defs = read_par(par_file)
-
-    acq_time = parse_acq_time(general_info)
-    dob = pd.to_datetime(demo_df["dob"], format="%Y-%m-%d")
-
-    age = "{0:.1f}".format((acq_time - dob).days / 365.25)
-    sex = demo_df["sex"]
-    out_df = pd.DataFrame({"participant_id": [bids_sub], "session_id": [bids_ses], "age": [age], "sex": [sex]},
-                          columns=["participant_id", "session_id", "age", "sex"])
-    out_acq_time_df = pd.DataFrame({"participant_id": [bids_sub], "session_id": [bids_ses], "acq_time": [acq_time]},
-                                   columns=["participant_id", "session_id", "acq_time"])
-
-    return out_df, out_acq_time_df
-
-
 def parse_physio(input_file):
     """
     loads physio files
@@ -352,11 +340,11 @@ def parse_physio(input_file):
 
 
 def save_physio(output_filename_base, meta_data, physio_data):
-    tsv_filename = output_filename_base + ".tsv"
+    tsv_filename = output_filename_base + ".tsv.gz"
     json_filename = output_filename_base + ".json"
 
     header = physio_data.columns.tolist()
-    json_data = {"header": header, "meta_data": meta_data}
+    json_data = {"Columns": header, "StartTime": 0, "SamplingFrequency": 496}
     add_info_to_json(json_filename, json_data, create_new=True)
 
     to_tsv(physio_data, tsv_filename, header=False)
