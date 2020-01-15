@@ -104,6 +104,7 @@ def get_image_acq(par_files):
         df = df.append(pd.DataFrame({"file": [par], "acq_time": [acq_time]}))
     return df
 
+
 # PAR IO
 def read_par(par_file):
     with open(par_file, "r") as fi:
@@ -224,24 +225,25 @@ def rotate_bvecs(bvecs_from_scanner, par_file):
 
 
 def rotate_vectors(directions, ap, fh, rl, orient):
-    # python implementation of matlab script rotDir
-    #
-    # function to rotate diffusion directions from a Philips *.par file
-    # returns rotated bvecs in RAS space; test with LHAB data
-    #  input:
-    #            directions : diffusion directions ( nx3 matrix ) [ap fh rl]
-    #            ap         : angulation AP ( in degrees )
-    #            fh         : angulation FH ( in degrees )
-    #            rl         : angulation RL ( in degrees )
-    #            orient     : orientation ( TRA==1 / SAG==2 / COR==3 )
-    #
-    #  output:
-    #            directions : rotatet diffusion directions ( nx3 matrix )
-    #
-    #
-    #  BEWARE : Angulations are iverted versions of par file angulations
-    #           the angulations are expected to be in degrees
+    """
+    python implementation of matlab script rotDir
 
+    function to rotate diffusion directions from a Philips *.par file
+    returns rotated bvecs in RAS space; test with LHAB data
+     input:
+               directions : diffusion directions ( nx3 matrix ) [ap fh rl]
+               ap         : angulation AP ( in degrees )
+               fh         : angulation FH ( in degrees )
+               rl         : angulation RL ( in degrees )
+               orient     : orientation ( TRA==1 / SAG==2 / COR==3 )
+
+     output:
+               directions : rotatet diffusion directions ( nx3 matrix )
+
+
+     BEWARE : Angulations are iverted versions of par file angulations
+              the angulations are expected to be in degrees
+    """
     pi, sin, cos = np.pi, np.sin, np.cos
     ap = ap * pi / 180.
     fh = fh * pi / 180.
@@ -313,27 +315,6 @@ def parse_acq_time(general_info):
     return acq_time
 
 
-# def fetch_demos(demo_df, old_subject_id, bids_sub, bids_ses, par_file):
-#     """
-#     get sex and dob and calculate age (using acquisition time)
-#     returns df
-#     """
-#     demo_df = demo_df.loc[old_subject_id]
-#     general_info, image_defs = read_par(par_file)
-#
-#     acq_time = parse_acq_time(general_info)
-#     dob = pd.to_datetime(demo_df["dob"], format="%Y-%m-%d")
-#
-#     age = "{0:.1f}".format((acq_time - dob).days / 365.25)
-#     sex = demo_df["sex"]
-#     out_df = pd.DataFrame({"participant_id": [bids_sub], "session_id": [bids_ses], "age": [age], "sex": [sex]},
-#                           columns=["participant_id", "session_id", "age", "sex"])
-#     out_acq_time_df = pd.DataFrame({"participant_id": [bids_sub], "session_id": [bids_ses], "acq_time": [acq_time]},
-#                                    columns=["participant_id", "session_id", "acq_time"])
-#
-#     return out_df, out_acq_time_df
-#
-
 def parse_physio(input_file):
     """
     loads physio files
@@ -359,11 +340,11 @@ def parse_physio(input_file):
 
 
 def save_physio(output_filename_base, meta_data, physio_data):
-    tsv_filename = output_filename_base + ".tsv"
+    tsv_filename = output_filename_base + ".tsv.gz"
     json_filename = output_filename_base + ".json"
 
     header = physio_data.columns.tolist()
-    json_data = {"header": header, "meta_data": meta_data}
+    json_data = {"Columns": header, "StartTime": 0, "SamplingFrequency": 496}
     add_info_to_json(json_filename, json_data, create_new=True)
 
     to_tsv(physio_data, tsv_filename, header=False)
