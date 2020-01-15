@@ -13,7 +13,7 @@ from nipype.interfaces.fsl import Reorient2Std
 from bids import BIDSLayout
 
 import lhab_pipelines
-from lhab_pipelines.utils import add_info_to_json, concat_tsvs
+from lhab_pipelines.utils import add_info_to_json, concat_tsvs, to_tsv
 from .utils import get_public_sub_id, get_clean_ses_id, get_clean_subject_id, \
     deface_data, dwi_treat_bvecs, add_additional_bids_parameters_from_par, \
     add_flip_angle_from_par, add_total_readout_time_from_par, parse_physio, save_physio, get_par_info, get_image_acq
@@ -196,6 +196,7 @@ def convert_modality(old_subject_id, old_ses_id, output_dir, info_out_dir, bids_
 
             out_components += [bids_run, bids_name]
             out_filename = "_".join(out_components)
+            out_filename_wo_name = "_".join(out_components[:-1])
             nii_file = os.path.join(nii_output_dir, out_filename + ".nii.gz")
             if not dry_run:
                 assert not os.path.exists(nii_file), "file exists. STOP. %s" % nii_file
@@ -230,7 +231,7 @@ def convert_modality(old_subject_id, old_ses_id, output_dir, info_out_dir, bids_
                 assert len(physio_in_file_list) < 2, "more than 1  phyio file found for %s" % physio_search_str
 
                 if physio_in_file_list and not dry_run:
-                    physio_out_file_base = os.path.join(nii_output_dir, out_filename + "_physio")
+                    physio_out_file_base = os.path.join(nii_output_dir, out_filename_wo_name + "_physio")
                     meta_data, physio_data = parse_physio(physio_in_file_list[0])
                     save_physio(physio_out_file_base, meta_data, physio_data)
 
@@ -310,6 +311,8 @@ def run_conversion(raw_dir, output_base_dir, analysis_level, info_out_dir, parti
     # privacy settings
     private_str = "_PRIVATE" if not (public_output and use_new_ids) else ""
     output_dir = Path(output_base_dir) / f"LHAB_{ds_version}{private_str}" / "sourcedata"
+    metainfo_dir = Path(output_base_dir) / f"LHAB_{ds_version}{private_str}" / "metainfo"
+    metainfo_dir.mkdir(exist_ok=True, parents=True)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     info_out_dir = Path(info_out_dir) / "PRIVATE"
@@ -346,7 +349,9 @@ def run_conversion(raw_dir, output_base_dir, analysis_level, info_out_dir, parti
         calc_demos(output_dir, info_out_dir, demo_file, pwd, new_id_lut_file=new_id_lut_file)
 
         print("Collecting scan durations...")
-        get_scan_duration(output_dir)
+        scan_duration_df = get_scan_duration(output_dir)
+        output_file = os.path.join(metainfo_dir, "scan_duration_rest.tsv")
+        to_tsv(scan_duration_df, output_file)
 
         # concat notconverted files
         unconv_df = concat_tsvs(info_out_dir / "unconverted_files")
@@ -357,7 +362,7 @@ def run_conversion(raw_dir, output_base_dir, analysis_level, info_out_dir, parti
 
         print("\n Get BIDS layout")
         layout = BIDSLayout(output_dir)
-        layout.to_df().to_csv(output_dir / "layout.csv", index=False)
+        layout.to_df().to_csv(metainfo_dir / "layout.csv", index=False)
 
     else:
         raise RuntimeError(f"Analysis level unknown {analysis_level}")
