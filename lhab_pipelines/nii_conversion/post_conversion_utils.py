@@ -103,12 +103,7 @@ def get_scan_duration(output_dir, modality="func", task="rest"):
     scans_df["scan_duration"] = scan_durations
     scans_df.reset_index(drop=True, inplace=True)
 
-    out_str = modality
-    if task:
-        out_str += "_" + task
-    output_file = os.path.join(output_dir, "scan_duration_%s.tsv" % out_str)
-    print("Writing scan duration to %s" % output_file)
-    to_tsv(scans_df, output_file)
+    return scans_df
 
 
 def reduce_sub_files(bids_dir, output_file, sub_file):
