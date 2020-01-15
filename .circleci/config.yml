@@ -1,84 +1,185 @@
 version: 2
 jobs:
-  build_test:
-      machine:
-        # Ubuntu 14.04 with Docker 17.10.0-ce
-        image: circleci/classic:201711-01
-      environment:
-        - DATA_DIR: "/tmp/data"
-      working_directory: /home/circleci/test
-      steps:
-        - restore_cache:
-            keys:
-              - docker-v1-{{ .Branch }}-{{ epoch }}
-              - docker-v1-{{ .Branch }}-
-              - docker-v1-master-
-              - docker-v1-
-        - checkout
-        - run:
-            name: Install parallel gzip
-            command: sudo apt-get update && sudo apt-get install pigz
-        - run:
-            name: Load Docker image layer cache
-            no_output_timeout: 30m
-            command: |
-              docker info
-              set +o pipefail
-              if [ -f /tmp/cache/docker.tar.gz ]; then
-                pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              else
-                echo "No docker cache found"
-              fi
-              docker images
-        - run:
-            name: get version
-            command: |
-              git describe --tags --always > version
-              cat version
-        - run:
-            name: Build Docker image
-            no_output_timeout: 60m
-            command: |
-              docker images
-              set +o pipefail
-              docker build --cache-from=${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} \
-              -t ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest .
-              docker images
-        - run:
-            name: Docker save
-            no_output_timeout: 40m
-            command: |
-              mkdir -p /tmp/cache
-              set +o pipefail
-              docker save ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest \
-                | pigz -2 -p 3 > /tmp/cache/docker.tar.gz
-        - save_cache:
-             key: docker-v1-{{ .Branch }}-{{ epoch }}
-             paths:
-              - /tmp/cache/docker.tar.gz
-        - persist_to_workspace:
-            root: /tmp
-            paths:
-              - cache/docker.tar.gz
+  build:
+    machine:
+      # Ubuntu 14.04 with Docker 17.10.0-ce
+      image: circleci/classic:201711-01
+    environment:
+      - DATA_DIR: "/tmp/data"
+    working_directory: /home/circleci/test
+    steps:
+      - restore_cache:
+          keys:
+            - docker-v1-{{ .Branch }}-{{ epoch }}
+            - docker-v1-{{ .Branch }}-
+            - docker-v1-master-
+            - docker-v1-
+      - checkout
+      - run:
+          name: Install parallel gzip
+          command: sudo apt-get update && sudo apt-get install pigz
+      - run:
+          name: Load Docker image layer cache
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            if [ -f /tmp/cache/docker.tar.gz ]; then
+              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+            else
+              echo "No docker cache found"
+            fi
+            docker images
+      - run:
+          name: get version
+          command: |
+            git describe --tags --always > version
+            cat version
+      - run:
+          name: Build Docker image
+          no_output_timeout: 60m
+          command: |
+            docker images
+            set +o pipefail
+            docker build --cache-from=${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} \
+            -t ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest .
+            docker images
+      - run:
+          name: Docker save
+          no_output_timeout: 40m
+          command: |
+            mkdir -p /tmp/cache
+            set +o pipefail
+            docker save ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest \
+              | pigz -2 -p 3 > /tmp/cache/docker.tar.gz
+      - save_cache:
+           key: docker-v1-{{ .Branch }}-{{ epoch }}
+           paths:
+            - /tmp/cache/docker.tar.gz
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - cache/docker.tar.gz
 
+  test1:
+    machine:
+      image: circleci/classic:201711-01
+    environment:
+      - DATA_DIR: "/tmp/data"
+    working_directory: /home/circleci/test
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Install parallel gzip
+          command: sudo apt-get update && sudo apt-get install pigz
+      - run:
+          name: Load Docker image layer cache
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+            docker images
+      - run:
+          name: tests... images
+          command: |
+            docker images
+      - run:
+          name: tests... pytest
+          command: |
+            docker run -ti --rm --read-only -v /tmp:/tmp -v /var/tmp:/var/tmp ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest pytest -v /code/lhab_pipelines/
+      - run:
+          name: tests... conversion test w toy phantom data. tp1 style
+          command: |
+            mkdir -p ${DATA_DIR}
+            docker run -ti --rm -v ${DATA_DIR}:/data ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest \
+            python /code/lhab_pipelines/scripts/nii_conversion/run_nii_conversion.py \
+            /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW /data/out participant \
+            --participant_label lhab_phan \
+            --session_label T1 T3 \
+            --ds_version phantomas \
+            --info_out_dir /data/out_info \
+            --new_id_lut_file /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW/00_PRIVATE_sub_lists/new_sub_id_lut.tsv \
+            --bvecs_from_scanner_file /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/data/00_bvecs/bvecs.fromscanner \
+            --session_duration_min 0
+      - run:
+          name: tests... conversion test w toy phantom data. tp1 style. check files
+          command: |
+            docker run -ti --rm -v ${DATA_DIR}:/data ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest \
+            python /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/run_check_nii_conversion_phantom_tp1style.py \
+            /data/out \
+            --participant_label lhab_phan \
+            --ds_version phantomas \
+            --info_out_dir /data/out_info
+      - store_artifacts:
+          path: /tmp/data
 
-        - run:
-            name: tests... images
-            command: |
-              docker images
-        - run:
-            name: tests... nosetests
-            command: |
-              docker run -ti --rm --read-only -v /tmp:/tmp -v /var/tmp:/var/tmp ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest nosetests -v /code/lhab_pipelines/
-        - run:
-            name: tests... conversion test
-            command: |
-              mkdir -p ${DATA_DIR}
-              docker run -ti --rm -v ${DATA_DIR}:/data -v /tmp:/tmp -v /var/tmp:/var/tmp ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest python /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/run_nii_conversion_phantom.py /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/01_RAW /data/out participant --ds_version phantomas
-        - store_artifacts:
-            path: /tmp/data
+  test2:
+    machine:
+      image: circleci/classic:201711-01
+    environment:
+      - DATA_DIR: "/home/circleci/data_tp6"
+    working_directory: /home/circleci/test
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - restore_cache:
+          keys:
+            - data-v5-{{ .Revision }}
+            - data-v5-
+      - run:
+          name: Install parallel gzip, unzip
+          command: sudo apt-get update && sudo apt-get install pigz unzip
+      - run:
+          name: Download Data
+          command: |
+            mkdir -p ${DATA_DIR} &&
+            if [[ ! -d ${DATA_DIR}/Phantom.zip ]]; then
+              wget -c -O ${DATA_DIR}/Phantom.zip \
+              "https://osf.io/4z5hu/download" && \
+              unzip -o ${DATA_DIR}/Phantom.zip -d ${DATA_DIR}
+            else
+              echo "Phantom.zip was cached"
+            fi
+      - save_cache:
+          key: data-v5-{{ .Revision }}-{{ epoch }}
+          paths:
+            - /home/circleci/data_tp6
+      - run:
+          name: Load Docker image layer cache
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+            docker images
 
-
+      - run:
+          name: tests... conversion test w toy phantom data. tp6 style
+          command: |
+            docker run -ti --rm -v ${DATA_DIR}:/data ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest \
+            python /code/lhab_pipelines/scripts/nii_conversion/run_nii_conversion.py \
+            /data/Phantom/RAW/ /data/out participant \
+            --participant_label lhab_phan \
+            --session_label T5 T6 \
+            --ds_version phantomas \
+            --info_out_dir /data/out_info \
+            --new_id_lut_file /data/Phantom/RAW/00_PRIVATE_sub_lists/new_sub_id_lut.tsv \
+            --bvecs_from_scanner_file /data/Phantom/RAW/00_bvecs/bvecs.fromscanner \
+            --session_duration_min 0 \
+            --tp6_raw_lut /data/Phantom/RAW/00_PRIVATE_sub_lists/tp6_raw_lut.tsv
+      - run:
+          name: tests... conversion test w toy phantom data. tp6 style. check files
+          command: |
+            docker run -ti --rm -v ${DATA_DIR}:/data ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest \
+            python /code/lhab_pipelines/scripts/nii_conversion/phantom_tests/run_check_nii_conversion_phantom_tp6style.py \
+            /data/out \
+            --participant_label lhab_phan \
+            --ds_version phantomas \
+            --info_out_dir /data/out_info
+      - store_artifacts:
+          path: /tmp/data_tp6
 
   deploy:
     machine:
@@ -113,13 +214,27 @@ workflows:
   version: 2
   build_test_deploy:
     jobs:
-      - build_test:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - test1:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /.*/
+      - test2:
+          requires:
+            - build
           filters:
             tags:
               only: /.*/
       - deploy:
           requires:
-            - build_test
+            - build
+            - test1
+            - test2
           filters:
             branches:
               ignore: /.*/

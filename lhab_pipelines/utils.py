@@ -3,7 +3,7 @@ import os
 import zipfile
 from collections import OrderedDict
 from io import StringIO
-
+from pathlib import Path
 import numpy
 import pandas as pd
 
@@ -56,4 +56,11 @@ def read_protected_file(zfile, pwd, datafile):
     fi.close()
     df = pd.read_csv(StringIO(data), sep="\t")
     df.set_index("subject_id", inplace=True)
+    return df
+
+
+def concat_tsvs(in_dir, search_str="*.tsv"):
+    files = Path(in_dir).glob(search_str)
+    dfs = [pd.read_csv(f, sep="\t") for f in files]
+    df = pd.concat(dfs, axis=0)
     return df
