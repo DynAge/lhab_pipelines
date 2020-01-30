@@ -34,7 +34,7 @@ jobs:
           name: get version
           command: |
             git describe --tags --always > version
-            cat version
+            cat version;echo $PWD;ls
       - run:
           name: Build Docker image
           no_output_timeout: 60m
