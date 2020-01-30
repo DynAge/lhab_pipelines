@@ -34,7 +34,7 @@ jobs:
           name: get version
           command: |
             git describe --tags --always > version
-            cat version;echo $PWD;ls
+            cat version
       - run:
           name: Build Docker image
           no_output_timeout: 60m
@@ -44,6 +44,10 @@ jobs:
             docker build --cache-from=${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} \
             -t ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest .
             docker images
+      - run:
+          name: get version from within container.
+          command: |
+            docker run --rm ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest python -c "import lhab_pipelines;print(lhab_pipelines.__version__)"
       - run:
           name: Docker save
           no_output_timeout: 40m
