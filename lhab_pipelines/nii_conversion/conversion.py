@@ -155,6 +155,9 @@ def convert_modality(old_subject_id, old_ses_id, output_dir, info_out_dir, bids_
     for s_str in search_str:
         par_file_list += sorted(glob("*" + s_str + "*.par"))
 
+    # remove double entries
+    par_file_list = list(set(par_file_list))
+
     if post_glob_filter:
         par_file_list = list(filter(post_glob_filter, par_file_list))
 
