@@ -1,8 +1,6 @@
-* v2.0.1
-  * install xlrd
-
-* v2.0.0
-  * Big overhaul
+* v2.0.2: fix 3d flair search string so that *3d* in the orig filename does not throw the search off
+* v2.0.1: install xlrd
+* v2.0.0: Big overhaul for ds v2.0.0
 
 * v1.1.13
     * added tp6 quick conversion and input data check
