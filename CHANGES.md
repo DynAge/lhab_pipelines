@@ -1,3 +1,9 @@
+* v2.0.1
+  * install xlrd
+
+* v2.0.0
+  * Big overhaul
+
 * v1.1.13
     * added tp6 quick conversion and input data check
 
