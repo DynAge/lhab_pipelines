@@ -41,8 +41,8 @@ def get_info_list_v2(do_deface):
         {"bids_name": "FLAIR", "bids_modality": "anat", "search_str": ["2dflair_", "flair_longtr", "_flair_"],
          "post_glob_filter": filter_not_3d_flair, "acq": "2D", "deface": do_deface, "add_info": {**general_info}
          },
-        {"bids_name": "FLAIR", "bids_modality": "anat", "search_str": "3d*flair_", "acq": "3D", "deface": do_deface,
-         "add_info": {**general_info}
+        {"bids_name": "FLAIR", "bids_modality": "anat", "search_str": ["3dflair", "3d_brain_view_flair"], "acq": "3D",
+         "deface": do_deface, "add_info": {**general_info}
          },
 
         # dwi
