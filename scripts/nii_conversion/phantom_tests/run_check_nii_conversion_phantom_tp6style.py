@@ -79,9 +79,7 @@ if __name__ == "__main__":
                       'sub-lhabX9999/ses-tp6/anat/sub-lhabX9999_ses-tp6_acq-3D_run-1_FLAIR.nii.gz',
                       'sub-lhabX9999/ses-tp6/anat/sub-lhabX9999_ses-tp6_run-1_T1w.nii.gz',
                       'sub-lhabX9999/ses-tp6/anat/sub-lhabX9999_ses-tp6_run-2_T1w.nii.gz',
-                      'sub-lhabX9999/ses-tp6/anat/sub-lhabX9999_ses-tp6_acq-2D_run-2_FLAIR.nii.gz',
                       'sub-lhabX9999/ses-tp6/anat/sub-lhabX9999_ses-tp6_run-1_T1w.json',
-                      'sub-lhabX9999/ses-tp6/anat/sub-lhabX9999_ses-tp6_acq-2D_run-2_FLAIR.json',
                       'sub-lhabX9999/ses-tp6/func/sub-lhabX9999_ses-tp6_task-rest_run-1_bold.json',
                       'sub-lhabX9999/ses-tp6/func/sub-lhabX9999_ses-tp6_task-rest_run-1_bold.nii.gz']
 
