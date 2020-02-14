@@ -351,11 +351,11 @@ def run_conversion(raw_dir, output_base_dir, analysis_level, info_out_dir, parti
         pwd = getpass.getpass("Enter the Password for dob file:")
         calc_demos(output_dir, info_out_dir, demo_file, pwd, new_id_lut_file=new_id_lut_file)
 
-        print("Collecting scan durations...")
-        scan_duration_df = get_scan_duration(output_dir)
-        output_file = os.path.join(metainfo_dir, "scan_duration_rest.tsv")
-        to_tsv(scan_duration_df, output_file)
-
+        # check for duplicates
+        mappings = concat_tsvs(info_out_dir / "parrec_mapping_PRIVATE")
+        dups = mappings[mappings.duplicated(subset="from")]
+        assert len(dups)==0, print("duplicates found", dups)
+        
         # concat notconverted files
         unconv_df = concat_tsvs(info_out_dir / "unconverted_files")
         unconv_df.to_csv(info_out_dir / "unconverted_files.tsv", sep="\t", index=False)
