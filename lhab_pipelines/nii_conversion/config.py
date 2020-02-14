@@ -16,7 +16,7 @@ rs_info = {"SliceEncodingDirection": "k", "SliceTiming": np.arange(0, 2.0, 2. / 
 
 
 def filter_not_3d_flair(s):
-    if "_3d_" in s:
+    if ("_3d_" in s) or ("wip3d_" in s):
         return False
     else:
         return True
