@@ -355,7 +355,7 @@ def run_conversion(raw_dir, output_base_dir, analysis_level, info_out_dir, parti
         mappings = concat_tsvs(info_out_dir / "parrec_mapping_PRIVATE")
         dups = mappings[mappings.duplicated(subset="from")]
         assert len(dups)==0, print("duplicates found", dups)
-        
+
         # concat notconverted files
         unconv_df = concat_tsvs(info_out_dir / "unconverted_files")
         unconv_df.to_csv(info_out_dir / "unconverted_files.tsv", sep="\t", index=False)
