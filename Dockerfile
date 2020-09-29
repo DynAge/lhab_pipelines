@@ -16,7 +16,7 @@ ENV FSLWISH=/usr/bin/wish
 ENV FSLOUTPUTTYPE=NIFTI_GZ
 
 RUN apt-get update && \
-    apt-get install -y pigz dcm2niix=1:1.0.20190902-1~nd18.04+1
+    apt-get install -y pigz dcm2niix=1:1.0.20200427-1~nd18.04+1
 
 RUN apt-get update && \
     apt-get install -y curl wget && \
