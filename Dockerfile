@@ -34,7 +34,7 @@ ENV PATH=/usr/local/anaconda/bin:$PATH
 
 RUN conda install pandas==0.25.1 numpy==1.16.4 xlrd
 RUN pip install nibabel==2.4.1 pybids==0.9.4
-RUN conda install --channel conda-forge nipype==1.2.3
+RUN conda install --channel conda-forge nipype
 
 RUN conda install git
 RUN pip install https://github.com/poldracklab/pydeface/archive/v1.1.0.zip
